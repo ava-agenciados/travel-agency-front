@@ -1,0 +1,11 @@
+/* Cores personalizadas do projeto */
+:root {
+  --primary-color: #122137;
+  --secund-color: #31425A;
+  --third-color: #1877F2;
+}
+
+/* Classe personalizada para max-width */
+.max-w-9xl {
+  max-width: 1440px;
+}
