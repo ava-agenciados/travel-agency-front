@@ -12,8 +12,6 @@ const Router = () => {
                     
                     <Route path='/' element={<LandingPage/>} />
 
-                    <Route path='/landing' element={<LandingPage/>} />
-
                     <Route path='/login' element={<Login/>} />
 
                     <Route path='*' element={<NotFound/>} />
