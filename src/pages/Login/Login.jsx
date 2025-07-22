@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
+import Images from '../../assets/image.jsx'
 
 /**
  * Página de Login - Mobile First
@@ -31,7 +32,7 @@ const Login = () => {
     setError('')
 
     try {
-      const response = await fetch('https://localhost:7283/api/v1/auth/login', {
+      const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,7 +47,7 @@ const Login = () => {
       if (!response.ok) {
         // Se a resposta não for ok, trata como credenciais incorretas
         if (response.status === 401 || response.status === 400) {
-          throw new Error('Email ou senha incorretos. Verifique suas credenciais.')
+          throw new Error('Email ou senha incorretos.')
         } else {
           throw new Error('Erro no servidor. Tente novamente mais tarde.')
         }
@@ -73,25 +74,28 @@ const Login = () => {
 
   return (
     <div className="min-h-screen" style={{
-      background: `linear-gradient(135deg, var(--primary-color) 0%, var(--secund-color) 100%)`
+      background: `#122137`
     }}>
       
-      {/* Header com logo e menu hambúrguer responsivo */}
-      <div className="flex justify-between items-center p-4 relative z-50">
+      {/* Header com logo e menu hambúrguer responsivo - apenas mobile */}
+      <div className="flex justify-between items-center p-4 relative z-50 lg:hidden">
         {/* Logo da empresa centralizada em mobile, esquerda em desktop */}
         <div className="flex items-center mx-auto md:mx-0">
-          <h1 className="text-white text-2xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizon</h1>
+          <h1 className="text-white text-2xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizons</h1>
         </div>
 
         {/* Menu Hambúrguer (apenas mobile/tablet) - ajustado posicionamento */}
-        <div className="absolute top-4 right-4 md:hidden">
+        <div className="absolute top-4 right-4">
           <HamburgerMenu />
         </div>
       </div>
 
-      {/* Container principal do formulário */}
-      <div className="flex items-center justify-center px-6 py-8">
-        <div className="w-full max-w-sm">
+      {/* Layout principal - responsivo */}
+      <div className="flex min-h-[calc(100vh-80px)]">
+        
+        {/* Container do formulário - esquerda no desktop, centro no mobile */}
+        <div className="w-full lg:w-3/5 flex items-center justify-center px-6 py-8">
+          <div className="w-full max-w-sm">
           
           {/* Título do formulário */}
           <div className="text-center mb-8">
@@ -224,7 +228,31 @@ const Login = () => {
           </div>
         </div>
       </div>
+
+      {/* Seção da imagem - apenas desktop, lado direito */}
+      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-0"> {/* relative: permite posicionamento absoluto, z-0: garante que fique atrás do header */}
+        <img 
+          src={Images.LoginPageImage} 
+          alt="LoginPageImage" 
+          className="w-full h-full object-cover"
+          style={{ 
+            filter: 'brightness(0.8) contrast(1.1)', // ajusta aparencia da imagem
+          }}
+          onError={(e) => { // substituir imagem se falhar o carregamento
+            e.target.src = 'https://via.placeholder.com/800x600/4A90E2/ffffff?text=New+Horizons';
+          }}
+        />
+        {/* Inner Shadow com configurações específicas do Figma */}
+        <div 
+          className="absolute inset-0 pointer-events-none" // absolute inset-0 cobre toda a imagem; pointer-events: none garante que o overlay não interfira na interação
+          style={{
+            boxShadow: 'inset 75px 60px 30px 5px #122137' // box-shadow: replica as configurações do Figma
+          }}
+        />
+      </div>
+
     </div>
+  </div>
   )
 }
 
