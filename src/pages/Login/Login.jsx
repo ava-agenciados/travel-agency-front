@@ -77,18 +77,30 @@ const Login = () => {
       background: `#122137`
     }}>
       
-      {/* Header com logo e menu hambúrguer responsivo - apenas mobile */}
-      <div className="flex justify-between items-center p-4 relative z-50 lg:hidden">
-        {/* Logo da empresa centralizada em mobile, esquerda em desktop */}
+      {/* Header com logo */}
+      <div className="fixed top-0 left-5 right-0 flex justify-between items-center p-4 z-50"> 
+        {/* Logo da empresa centralizada (apenas mobile) */}
         <div className="flex items-center mx-auto md:mx-0">
           <h1 className="text-white text-2xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizons</h1>
         </div>
-
-        {/* Menu Hambúrguer (apenas mobile/tablet) - ajustado posicionamento */}
-        <div className="absolute top-4 right-4">
-          <HamburgerMenu />
-        </div>
       </div>
+
+      {/* Imagem PlaceHolder centralizada no meio absoluto da página */}
+      <div className="fixed top-0 left-0 right-0 flex justify-center pointer-events-none z-30">
+        <img 
+          src={Images.PlaceHolderImage} 
+          alt="PlaceholderImage" 
+          className="  pointer-events-auto"
+          style={{ 
+            width: '300px',
+            height: '250px',
+            filter: 'brightness(0.9) contrast(1.1)',
+          }}
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/160x160/4A90E2/ffffff?text=Logo';
+          }}
+        />
+      </div>      
 
       {/* Layout principal - responsivo */}
       <div className="flex min-h-[calc(100vh-80px)]">
@@ -102,7 +114,7 @@ const Login = () => {
             <h2 className="text-white font-semibold italic" style={{ fontFamily: 'Inter, sans-serif' }}>
               ACESSE SUA CONTA
             </h2>
-          </div>
+          </div>        
           
           {/* Exibição de mensagens de erro - destaque vermelho */}
           {error && (
@@ -137,7 +149,7 @@ const Login = () => {
                 required
                 className="w-full bg-transparent text-white placeholder-white placeholder-opacity-60 focus:outline-none text-base border-none p-0"
                 style={{ fontFamily: 'Inter, sans-serif' }}
-                placeholder=""
+                placeholder="EMAIL"
               />
             </fieldset>
 
@@ -158,7 +170,7 @@ const Login = () => {
                 required
                 className="w-full bg-transparent text-white placeholder-white placeholder-opacity-60 focus:outline-none text-base border-none p-0"
                 style={{ fontFamily: 'Inter, sans-serif' }}
-                placeholder=""
+                placeholder="SENHA"
               />
             </fieldset>
 
@@ -230,7 +242,7 @@ const Login = () => {
       </div>
 
       {/* Seção da imagem - apenas desktop, lado direito */}
-      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-0"> {/* relative: permite posicionamento absoluto, z-0: garante que fique atrás do header */}
+      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-20"> {/* relative: permite posicionamento absoluto, z-0: garante que fique atrás do header */}
         <img 
           src={Images.LoginPageImage} 
           alt="LoginPageImage" 
