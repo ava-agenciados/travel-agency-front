@@ -1,7 +1,9 @@
-import ImageExample from 'imagem/example.png'
+ import LoginPageImage from './images/LoginPageImage.jpg'
 
+// Importando imagens da internet (atual)
 const Images = {
-    ImageExample
+    LoginPageImage
+
 }
 
 export default Images;
