@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite' // Função do Vite para tipagem e autocomplete da configuração
+import react from '@vitejs/plugin-react' // Plugin oficial do React para o Vite
 
-// https://vite.dev/config/
+
 export default defineConfig({
   plugins: [react()],
   server: {
