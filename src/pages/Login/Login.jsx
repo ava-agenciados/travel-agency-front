@@ -176,7 +176,7 @@ const Login = () => {
             {/* Link "Esqueci minha senha" - posicionado conforme imagem */}
             <div className="text-right pt-2">
               <a 
-                href="/forgot-password" 
+                href="/password-recovery" 
                 className="text-white text-sm hover:underline transition duration-200 opacity-90 hover:opacity-100"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
