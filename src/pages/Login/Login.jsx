@@ -76,7 +76,6 @@ const Login = () => {
     <div className="min-h-screen" style={{
       background: `#122137`
     }}>
-      
       {/* Header com logo */}
       <div className="fixed top-0 left-5 right-0 flex justify-between items-center p-4 z-50"> 
         {/* Logo da empresa centralizada (apenas mobile) */}
