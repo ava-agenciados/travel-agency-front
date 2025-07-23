@@ -4,6 +4,7 @@ import LandingPage from '../pages/LandingPage/LandingPage.jsx'
 import Login from '../pages/Login/Login.jsx'
 import Register from '../pages/Register/register.jsx'
 
+
 const Router = () => {
 
     return (
@@ -16,7 +17,6 @@ const Router = () => {
                     <Route path='/login' element={<Login/>} />
 
                     <Route path='*' element={<NotFound/>} />
-
                     <Route path='/register' element={<Register/>} />
 
                 </Routes>
