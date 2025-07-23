@@ -1,9 +1,10 @@
  import LoginPageImage from './images/LoginPageImage.jpg'
+ import PlaceHolderImage from './images/PlaceholderImage.png'
 
 // Importando imagens da internet (atual)
 const Images = {
-    LoginPageImage
-
+    LoginPageImage,
+    PlaceHolderImage
 }
 
 export default Images;
