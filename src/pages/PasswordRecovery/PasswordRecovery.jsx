@@ -124,7 +124,7 @@ const PasswordRecovery = () => {
           <div className="w-full max-w-sm">
           
             {/* Título do formulário */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-4">
               <h2 className="text-white font-semibold italic text-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
                 RECUPERAR SENHA
               </h2>
@@ -220,7 +220,7 @@ const PasswordRecovery = () => {
               </div>
             </form>
 
-            {/* Link para voltar ao login */}
+            {/* Link para voltar ao login e cadastrar-se */}
             <div className="mt-8 text-center pb-8">
               <p className="text-white text-sm opacity-90" style={{ fontFamily: 'Inter, sans-serif' }}>
                 Lembrou da senha?{' '}
@@ -230,6 +230,17 @@ const PasswordRecovery = () => {
                   style={{ color: '#FFD700', fontFamily: 'Inter, sans-serif' }}
                 >
                   Voltar ao Login
+                </a>
+              </p>
+              
+              <p className="text-white p-3 text-sm opacity-90" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Não possui conta?{' '}
+                <a 
+                  href="/register" 
+                  className="font-medium hover:underline transition duration-200"
+                  style={{ color: '#FFD700', fontFamily: 'Inter, sans-serif' }}
+                >
+                  Cadastre-se
                 </a>
               </p>
             </div>
