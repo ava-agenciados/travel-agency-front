@@ -101,7 +101,6 @@ const Login = () => {
         />
       </div>      
 
-
       {/* Layout principal - responsivo */}
       <div className="flex min-h-[calc(100vh-80px)]">
         
@@ -150,7 +149,6 @@ const Login = () => {
                 className="w-full bg-transparent text-white placeholder-white placeholder-opacity-60 focus:outline-none text-base border-none p-0"
                 style={{ fontFamily: 'Inter, sans-serif' }}
                 placeholder="EMAIL"
-
               />
             </fieldset>
 
@@ -172,8 +170,6 @@ const Login = () => {
                 className="w-full bg-transparent text-white placeholder-white placeholder-opacity-60 focus:outline-none text-base border-none p-0"
                 style={{ fontFamily: 'Inter, sans-serif' }}
                 placeholder="SENHA"
-
-
               />
             </fieldset>
 
@@ -246,7 +242,6 @@ const Login = () => {
 
       {/* Seção da imagem - apenas desktop, lado direito */}
       <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-20"> {/* relative: permite posicionamento absoluto, z-0: garante que fique atrás do header */}
-
         <img 
           src={Images.LoginPageImage} 
           alt="LoginPageImage" 
