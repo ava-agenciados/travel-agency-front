@@ -77,15 +77,15 @@ const Login = () => {
       background: `#122137`
     }}>
       {/* Header com logo */}
-      <div className="fixed top-0 left-5 right-0 flex justify-between items-center p-4 z-50"> 
+      <div className="fixed top-0 left-5 right-0 flex justify-between items-center p-4 z-50 lg:hidden"> 
         {/* Logo da empresa centralizada (apenas mobile) */}
-        <div className="flex items-center mx-auto md:mx-0">
+        <div className="flex items-center mx-auto">
           <h1 className="text-white text-2xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizons</h1>
         </div>
       </div>
 
       {/* Imagem PlaceHolder centralizada no meio absoluto da página */}
-      <div className="fixed top-0 left-0 right-0 flex justify-center pointer-events-none z-30">
+      <div className="fixed top-0 left-0 right-0 flex justify-center pointer-events-none z-10">
         <img 
           src={Images.PlaceHolderImage} 
           alt="PlaceholderImage" 
@@ -174,11 +174,14 @@ const Login = () => {
             </fieldset>
 
             {/* Link "Esqueci minha senha" - posicionado conforme imagem */}
-            <div className="text-right pt-2">
+            <div className="text-right">
               <a 
                 href="/password-recovery" 
                 className="text-white text-sm hover:underline transition duration-200 opacity-90 hover:opacity-100"
-                style={{ fontFamily: 'Inter, sans-serif' }}
+                style={{ 
+                  fontFamily: 'Inter, sans-serif',
+                  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)'
+                }}
               >
                 Esqueci minha senha
               </a>
