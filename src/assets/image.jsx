@@ -1,7 +1,11 @@
-import ImageExample from 'imagem/example.png'
+import Bg_HeroSection from './images/bg_herosection.png'
+import PalmTree from './images/palm-tree.png'
+import Plan from './images/plan.png'
 
 const Images = {
-    ImageExample
+    Bg_HeroSection,
+    PalmTree,
+    Plan
 }
 
 export default Images;
