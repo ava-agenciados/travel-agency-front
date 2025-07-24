@@ -76,30 +76,15 @@ const Login = () => {
     <div className="min-h-screen" style={{
       background: `#122137`
     }}>
-      {/* Header com logo */}
-      <div className="fixed top-0 left-5 right-0 flex justify-between items-center p-4 z-50 lg:hidden"> 
-        {/* Logo da empresa centralizada (apenas mobile) */}
-        <div className="flex items-center mx-auto">
-          <h1 className="text-white text-2xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizons</h1>
-        </div>
-      </div>
 
-      {/* Imagem PlaceHolder centralizada no meio absoluto da página */}
-      <div className="fixed top-0 left-0 right-0 flex justify-center pointer-events-none z-10">
-        <img 
-          src={Images.PlaceHolderImage} 
-          alt="PlaceholderImage" 
-          className="  pointer-events-auto"
-          style={{ 
-            width: '300px',
-            height: '250px',
-            filter: 'brightness(0.9) contrast(1.1)',
-          }}
-          onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/160x160/4A90E2/ffffff?text=Logo';
-          }}
-        />
-      </div>      
+      {/* Logo da Agência */}
+      <div className="absolute top-4 z-30 w-full lg:w-auto lg:left-6">
+        <div className="text-center lg:text-left px-4 lg:px-0">
+          <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
+            New Horizons
+          </h1>
+        </div>
+      </div> 
 
       {/* Layout principal - responsivo */}
       <div className="flex min-h-[calc(100vh-80px)]">
@@ -244,7 +229,7 @@ const Login = () => {
       </div>
 
       {/* Seção da imagem - apenas desktop, lado direito */}
-      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-20"> {/* relative: permite posicionamento absoluto, z-0: garante que fique atrás do header */}
+      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-20">
         <img 
           src={Images.LoginPageImage} 
           alt="LoginPageImage" 

@@ -1,10 +1,7 @@
-import LoginPageImage from './images/LoginPageImage.jpg'
-import PlaceHolderImage from './images/PlaceHolderImage.png'
+import LoginPageImage from "../assets/images/LoginPageImage.jpg"
 
-// Importando imagens da internet (atual)
 const Images = {
     LoginPageImage,
-    PlaceHolderImage
 }
 
 export default Images;

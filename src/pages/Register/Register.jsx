@@ -86,13 +86,14 @@ const Register = () => {
       background: `#122137`
     }}>
       
-      {/* Header com logo centralizada - apenas mobile */}
-      <div className="p-4 relative z-50 lg:hidden">
-        {/* Logo da empresa centralizada em mobile */}
-        <div className="text-center">
-          <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizons</h1>
+      {/* Header com logo */}
+      <div className="relative top-0 left-0 w-full p-4 z-50">
+        {/* Logo da empresa centralizada em mobile, esquerda no desktop */}
+        <div className="text-center lg:text-left">
+          <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}
+          >New Horizons</h1>
         </div>
-      </div>
+      </div>  
 
       {/* Layout principal - responsivo */}
       <div className="flex min-h-[calc(100vh-80px)]">
@@ -319,7 +320,7 @@ const Register = () => {
       </div>
 
       {/* Seção da imagem - apenas desktop, lado direito */}
-      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-0">
+      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden z-0">
         <img 
           src={Images.LoginPageImage} 
           alt="RegisterPageImage" 
