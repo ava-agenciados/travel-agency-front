@@ -1,6 +1,10 @@
+// Importa useState para gerenciamento de estado local
 import { useState } from 'react'
+// Importa componente de menu hambúrguer (não utilizado neste componente)
 import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
+// Importa componente reutilizável de campo de senha
 import PasswordField from '../../components/PasswordField/PasswordField'
+// Importa imagens utilizadas na página
 import Images from '../../assets/image.jsx'
 
 /**
@@ -11,20 +15,21 @@ import Images from '../../assets/image.jsx'
 const Register = () => {
   // Estados para controlar o formulário de cadastro
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    cpfPassport: '',
-    phoneNumber: '',
-    email: '',
-    password: ''
+    firstName: '',    // Nome do usuário
+    lastName: '',     // Sobrenome do usuário
+    cpfPassport: '',  // CPF ou Passaporte
+    phoneNumber: '',  // Número de telefone
+    email: '',        // Email do usuário
+    password: ''      // Senha do usuário
   })
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [isLoading, setIsLoading] = useState(false)  // Controla estado de carregamento
+  const [error, setError] = useState('')             // Armazena mensagens de erro
+  const [success, setSuccess] = useState('')         // Armazena mensagens de sucesso
 
-  // Função para lidar com mudanças nos inputs
+  // Função para lidar com mudanças nos inputs do formulário
   const handleChange = (e) => {
     const { name, value } = e.target
+    // Atualiza o estado preservando os outros campos
     setFormData(prev => ({
       ...prev,
       [name]: value

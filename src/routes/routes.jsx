@@ -1,4 +1,6 @@
+// Importa componentes de roteamento do React Router DOM
 import { Route, Routes, BrowserRouter } from 'react-router-dom'
+// Importa páginas da aplicação
 import NotFound from '../pages/NotFound/NotFound.jsx'
 import LandingPage from '../pages/LandingPage/LandingPage.jsx'
 import Login from '../pages/Login/Login.jsx'
@@ -7,22 +9,27 @@ import Register from '../pages/Register/register.jsx'
 import ResetPassword from '../pages/ResetPassword/ResetPassword.jsx'
 import AdminDashboard from '../pages/Admin/AdminDashboard.jsx'
 import AttendantDashboard from '../pages/Attendant/AttendantDashboard.jsx'
+// Importa componente para proteger rotas baseado em roles
 import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute.jsx'
 
+// Componente que define todas as rotas da aplicação
 const Router = () => {
 
     return (
         <>
+            {/* BrowserRouter fornece contexto de roteamento para toda a aplicação */}
             <BrowserRouter>
                 <Routes>
                     
+                    {/* Rotas públicas - acessíveis sem autenticação */}
                     <Route path='/' element={<LandingPage/>} />
                     <Route path='/login' element={<Login/>} />
                     <Route path='/register' element={<Register/>} />
                     <Route path='/password-recovery' element={<PasswordRecovery/>} />
                     <Route path='/reset-password' element={<ResetPassword/>} />
                     
-                    {/* Rotas Protegidas */}
+                    {/* Rotas Protegidas - requerem autenticação e role específico */}
+                    {/* Rota para administradores - apenas usuários com role 'Admin' podem acessar */}
                     <Route 
                         path='/admin' 
                         element={
@@ -31,6 +38,7 @@ const Router = () => {
                             </ProtectedRoute>
                         } 
                     />
+                    {/* Rota para atendentes - apenas usuários com role 'Atendente' podem acessar */}
                     <Route 
                         path='/attendant' 
                         element={
@@ -40,6 +48,7 @@ const Router = () => {
                         } 
                     />
                     
+                    {/* Rota catch-all - qualquer URL não definida mostra página 404 */}
                     <Route path='*' element={<NotFound/>} />
 
                 </Routes>
@@ -48,4 +57,5 @@ const Router = () => {
     )
 }
 
+// Exporta o componente Router como padrão
 export default Router

@@ -5,6 +5,7 @@ import { useState } from 'react'
  * Visível apenas em dispositivos móveis (até iPad)
  * Responsivo e com animações suaves
  */
+
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false)
 

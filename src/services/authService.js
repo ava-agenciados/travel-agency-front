@@ -19,8 +19,11 @@ class AuthService {
     }
   }
 
+
+
   /**
    * Recupera o token do localStorage
+   * 
    * @returns {string|null} Token armazenado ou null se não existir
    */
   getToken() {
@@ -89,7 +92,6 @@ class AuthService {
 
     // O role pode estar em diferentes claims dependendo da configuração do servidor
     return decoded.role || 
-           decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 
            decoded.roles || 
            null
   }
@@ -107,7 +109,7 @@ class AuthService {
       email: decoded.email,
       role: this.getUserRole(),
       exp: decoded.exp,
-      iat: decoded.iat
+      iat: decoded.iat 
     }
   }
 
@@ -117,7 +119,7 @@ class AuthService {
    */
   isAdmin() {
     const role = this.getUserRole()
-    return role === 'Admin' || role === 'Administrador'
+    return role === 'Admin'
   }
 
   /**
@@ -149,7 +151,7 @@ class AuthService {
 
     const role = this.getUserRole()
     
-    if (role === 'Admin' || role === 'Administrador') {
+    if (role === 'Admin') {
       // Redireciona para dashboard admin
       window.location.href = '/admin'
     } else if (role === 'Atendente') {

@@ -1,8 +1,14 @@
+// Importa useState para gerenciamento de estado local
 import { useState } from 'react'
+// Importa hook customizado para contexto de autenticação
 import { useAuth } from '../../hooks/useAuth'
+// Importa componente de menu hambúrguer (não utilizado neste componente)
 import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
+// Importa componente reutilizável de campo de senha
 import PasswordField from '../../components/PasswordField/PasswordField'
+// Importa imagens utilizadas na página
 import Images from '../../assets/image.jsx'
+// Importa serviço de autenticação para funcionalidades auxiliares
 import authService from '../../services/authService'
 
 /**
@@ -11,19 +17,21 @@ import authService from '../../services/authService'
  * Integração com API: https://localhost:{value}/api/v1/auth/login
  */
 const Login = () => {
+  // Desestrutura a função login do contexto de autenticação
   const { login } = useAuth()
   
   // Estados para controlar o formulário de login
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: '',     // Email do usuário
+    password: ''   // Senha do usuário
   })
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)  // Controla estado de carregamento
+  const [error, setError] = useState('')             // Armazena mensagens de erro
 
-  // Função para lidar com mudanças nos inputs
+  // Função para lidar com mudanças nos inputs do formulário
   const handleChange = (e) => {
     const { name, value } = e.target
+    // Atualiza o estado preservando os outros campos
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -32,23 +40,25 @@ const Login = () => {
 
   // Função para enviar o formulário de login
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
+    e.preventDefault()        // Previne o comportamento padrão do formulário
+    setIsLoading(true)        // Ativa estado de carregamento
+    setError('')              // Limpa erros anteriores
 
     try {
+      // Faz requisição para a API de login
       const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Importante para enviar cookies
+        credentials: 'include',
         body: JSON.stringify({
           email: formData.email,
           password: formData.password
         })
       })
 
+      // Verifica se a resposta da API foi bem-sucedida
       if (!response.ok) {
         // Se a resposta não for ok, trata como credenciais incorretas
         if (response.status === 401 || response.status === 400) {
@@ -58,10 +68,11 @@ const Login = () => {
         }
       }
 
+      // Converte a resposta para JSON
       const data = await response.json()
       console.log('Login realizado com sucesso:', data)
       
-      // Verificar se o login foi bem-sucedido e há um token
+      // Verificar se o login foi bem-sucedido e há um token válido
       if (data.success && data.token) {
         // Usar o contexto de autenticação para fazer login
         const loginResult = login(data.token)
@@ -69,7 +80,7 @@ const Login = () => {
         if (loginResult.success) {
           console.log('Informações do usuário:', loginResult.user)
           
-          // Usar o método do authService para redirecionamento
+          // Usar o método do authService para redirecionamento baseado no role
           const redirectUrl = authService.getRedirectUrl()
           window.location.href = redirectUrl
         } else {
@@ -80,19 +91,21 @@ const Login = () => {
       }
       
     } catch (err) {
-      // Exibir mensagem de erro vermelha
+      // Exibir mensagem de erro vermelha para o usuário
       setError(err.message || 'Erro interno do servidor')
     } finally {
+      // Sempre desativa o loading, independentemente do resultado
       setIsLoading(false)
     }
   }
 
   return (
+    // Container principal com fundo escuro
     <div className="min-h-screen" style={{
       background: `#122137`
     }}>
 
-      {/* Logo da Agência */}
+      {/* Logo da Agência - posicionado no topo */}
       <div className="absolute top-4 z-30 w-full lg:w-auto lg:left-6">
         <div className="text-center lg:text-left px-4 lg:px-0">
           <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -101,7 +114,7 @@ const Login = () => {
         </div>
       </div> 
 
-      {/* Layout principal - responsivo */}
+      {/* Layout principal - responsivo: mobile (coluna) e desktop (linha) */}
       <div className="flex min-h-[calc(100vh-80px)]">
         
         {/* Container do formulário - esquerda no desktop, centro no mobile */}
@@ -115,7 +128,7 @@ const Login = () => {
             </h2>
           </div>        
           
-          {/* Exibição de mensagens de erro - destaque vermelho */}
+          {/* Exibição de mensagens de erro - destaque vermelho com ícone */}
           {error && (
             <div className="mb-6 p-4 bg-red-500 bg-opacity-90 border-2 border-red-600 text-white rounded-lg text-sm shadow-lg">
               <div className="flex items-center">
