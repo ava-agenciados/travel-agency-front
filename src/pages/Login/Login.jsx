@@ -1,6 +1,9 @@
 import { useState } from 'react'
+import { useAuth } from '../../hooks/useAuth'
 import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
+import PasswordField from '../../components/PasswordField/PasswordField'
 import Images from '../../assets/image.jsx'
+import authService from '../../services/authService'
 
 /**
  * Página de Login - Mobile First
@@ -8,6 +11,8 @@ import Images from '../../assets/image.jsx'
  * Integração com API: https://localhost:{value}/api/v1/auth/login
  */
 const Login = () => {
+  const { login } = useAuth()
+  
   // Estados para controlar o formulário de login
   const [formData, setFormData] = useState({
     email: '',
@@ -56,13 +61,23 @@ const Login = () => {
       const data = await response.json()
       console.log('Login realizado com sucesso:', data)
       
-      // Armazenar token se necessário (localStorage, sessionStorage, etc.)
-      if (data.token) {
-        localStorage.setItem('authToken', data.token)
+      // Verificar se o login foi bem-sucedido e há um token
+      if (data.success && data.token) {
+        // Usar o contexto de autenticação para fazer login
+        const loginResult = login(data.token)
+        
+        if (loginResult.success) {
+          console.log('Informações do usuário:', loginResult.user)
+          
+          // Usar o método do authService para redirecionamento
+          const redirectUrl = authService.getRedirectUrl()
+          window.location.href = redirectUrl
+        } else {
+          throw new Error(loginResult.error || 'Erro ao processar token')
+        }
+      } else {
+        throw new Error(data.message || 'Erro no login')
       }
-      
-      // Redirecionamento para a página inicial após login bem-sucedido
-      window.location.href = '/'
       
     } catch (err) {
       // Exibir mensagem de erro vermelha
@@ -76,30 +91,15 @@ const Login = () => {
     <div className="min-h-screen" style={{
       background: `#122137`
     }}>
-      {/* Header com logo */}
-      <div className="fixed top-0 left-5 right-0 flex justify-between items-center p-4 z-50 lg:hidden"> 
-        {/* Logo da empresa centralizada (apenas mobile) */}
-        <div className="flex items-center mx-auto">
-          <h1 className="text-white text-2xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizons</h1>
-        </div>
-      </div>
 
-      {/* Imagem PlaceHolder centralizada no meio absoluto da página */}
-      <div className="fixed top-0 left-0 right-0 flex justify-center pointer-events-none z-10">
-        <img 
-          src={Images.PlaceHolderImage} 
-          alt="PlaceholderImage" 
-          className="  pointer-events-auto"
-          style={{ 
-            width: '300px',
-            height: '250px',
-            filter: 'brightness(0.9) contrast(1.1)',
-          }}
-          onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/160x160/4A90E2/ffffff?text=Logo';
-          }}
-        />
-      </div>      
+      {/* Logo da Agência */}
+      <div className="absolute top-4 z-30 w-full lg:w-auto lg:left-6">
+        <div className="text-center lg:text-left px-4 lg:px-0">
+          <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
+            New Horizons
+          </h1>
+        </div>
+      </div> 
 
       {/* Layout principal - responsivo */}
       <div className="flex min-h-[calc(100vh-80px)]">
@@ -109,7 +109,7 @@ const Login = () => {
           <div className="w-full max-w-sm">
           
           {/* Título do formulário */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 mt-16">
             <h2 className="text-white font-semibold italic" style={{ fontFamily: 'Inter, sans-serif' }}>
               ACESSE SUA CONTA
             </h2>
@@ -152,26 +152,16 @@ const Login = () => {
               />
             </fieldset>
 
-            {/* Campo de Senha - usando fieldset e legend */}
-            <fieldset className="border border-white border-opacity-40 rounded-md p-2 relative" style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <legend className="text-white text-sm font-medium px-2 uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>
-                SENHA
-              </legend>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full bg-transparent text-white placeholder-white placeholder-opacity-60 focus:outline-none text-base border-none p-0"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-                placeholder="SENHA"
-              />
-            </fieldset>
+            {/* Campo de Senha - usando o componente PasswordField */}
+            <PasswordField
+              label="SENHA"
+              name="password"
+              id="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="SENHA"
+              required={true}
+            />
 
             {/* Link "Esqueci minha senha" - posicionado conforme imagem */}
             <div className="text-right">
@@ -244,7 +234,7 @@ const Login = () => {
       </div>
 
       {/* Seção da imagem - apenas desktop, lado direito */}
-      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-20"> {/* relative: permite posicionamento absoluto, z-0: garante que fique atrás do header */}
+      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-20">
         <img 
           src={Images.LoginPageImage} 
           alt="LoginPageImage" 

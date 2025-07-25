@@ -62,8 +62,8 @@ const PasswordRecovery = () => {
 
       if (!response.ok) {
         // Tratamento de erros específicos
-        if (response.status === 404) {
-          throw new Error('Email não encontrado em nossa base de dados.')
+        if (response.status === 400) {
+          throw new Error('Email não cadastrado.')
         } else if (response.status === 429) {
           throw new Error('Muitas tentativas. Tente novamente em alguns minutos.')
         } else {
@@ -87,37 +87,21 @@ const PasswordRecovery = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{
+    <div className="h-screen overflow-hidden" style={{
       background: `#122137`
-    }}>
-      
-      {/* Header com logo */}
-      <div className="fixed top-0 left-5 right-0 flex justify-between items-center p-4 z-50"> 
-        {/* Logo da empresa centralizada (apenas mobile) */}
-        <div className="flex items-center mx-auto md:mx-0">
-          <h1 className="text-white text-2xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizons</h1>
-        </div>
-      </div>
+    }}>      
 
-      {/* Imagem PlaceHolder centralizada no meio absoluto da página */}
-      <div className="fixed top-0 left-0 right-0 flex justify-center pointer-events-none z-30">
-        <img 
-          src={Images.PlaceHolderImage} 
-          alt="PlaceholderImage" 
-          className="  pointer-events-auto"
-          style={{ 
-            width: '300px',
-            height: '250px',
-            filter: 'brightness(0.9) contrast(1.1)',
-          }}
-          onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/160x160/4A90E2/ffffff?text=Logo';
-          }}
-        />
-      </div>      
+      {/* Logo da Agência */}
+      <div className="absolute top-4 z-30 w-full lg:w-auto lg:left-6">
+        <div className="text-center lg:text-left px-4 lg:px-0">
+          <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
+            New Horizons
+          </h1>
+        </div>
+      </div> 
 
       {/* Layout principal - responsivo */}
-      <div className="flex min-h-screen">
+      <div className="flex h-screen pt-20 lg:pt-0">
         
         {/* Container do formulário - esquerda no desktop, centro no mobile */}
         <div className="w-full lg:w-3/5 flex items-center justify-center px-6 py-8">
@@ -248,7 +232,7 @@ const PasswordRecovery = () => {
         </div>
 
       {/* Seção da imagem - apenas desktop, lado direito */}
-      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-20"> {/* relative: permite posicionamento absoluto, z-0: garante que fique atrás do header */}
+      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-20"> 
         <img 
           src={Images.LoginPageImage} 
           alt="LoginPageImage" 

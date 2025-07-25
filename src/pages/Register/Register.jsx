@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
+import PasswordField from '../../components/PasswordField/PasswordField'
 import Images from '../../assets/image.jsx'
 
 /**
@@ -86,13 +87,14 @@ const Register = () => {
       background: `#122137`
     }}>
       
-      {/* Header com logo centralizada - apenas mobile */}
-      <div className="p-4 relative z-50 lg:hidden">
-        {/* Logo da empresa centralizada em mobile */}
-        <div className="text-center">
-          <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizons</h1>
+      {/* Header com logo */}
+      <div className="relative top-0 left-0 w-full p-4 z-50">
+        {/* Logo da empresa centralizada em mobile, esquerda no desktop */}
+        <div className="text-center lg:text-left">
+          <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}
+          >New Horizons</h1>
         </div>
-      </div>
+      </div>  
 
       {/* Layout principal - responsivo */}
       <div className="flex min-h-[calc(100vh-80px)]">
@@ -242,26 +244,16 @@ const Register = () => {
               />
             </fieldset>
 
-            {/* Campo Senha */}
-            <fieldset className="border border-white border-opacity-40 rounded-md p-2 relative" style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <legend className="text-white text-sm font-medium px-2 uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>
-                SENHA
-              </legend>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full bg-transparent text-white placeholder-white placeholder-opacity-60 focus:outline-none text-base border-none p-0"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-                placeholder=""
-              />
-            </fieldset>
+            {/* Campo Senha - usando o componente PasswordField */}
+            <PasswordField
+              label="SENHA"
+              name="password"
+              id="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder=""
+              required={true}
+            />
 
             {/* Botão principal de cadastro */}
             <button
@@ -319,7 +311,7 @@ const Register = () => {
       </div>
 
       {/* Seção da imagem - apenas desktop, lado direito */}
-      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden relative z-0">
+      <div className="hidden lg:flex lg:w-2/4 fixed right-0 top-0 h-screen overflow-hidden z-0">
         <img 
           src={Images.LoginPageImage} 
           alt="RegisterPageImage" 
