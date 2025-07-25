@@ -42,7 +42,7 @@ function CategoryScroll({ category, selectedIdx, setSelectedIdx }) {
           className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2"
           aria-label="Scroll left"
         >
-          <i class='bxr  bx-chevron-left text-3xl text-blue-600 font-black'  ></i> 
+          <i className='bxr  bx-chevron-left text-3xl text-blue-600 font-black'  ></i> 
         </button>
       )}
 
@@ -78,7 +78,7 @@ function CategoryScroll({ category, selectedIdx, setSelectedIdx }) {
           className="absolute right-0 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white shadow-md p-2"
           aria-label="Scroll right"
         >
-          <i class='bxr  bx-chevron-right text-3xl text-blue-600 font-black'  ></i> 
+          <i className='bxr  bx-chevron-right text-3xl text-blue-600 font-black'  ></i> 
         </button>
       )}
     </div>
