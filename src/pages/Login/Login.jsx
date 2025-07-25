@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
+import PasswordField from '../../components/PasswordField/PasswordField'
 import Images from '../../assets/image.jsx'
 
 /**
@@ -94,7 +95,7 @@ const Login = () => {
           <div className="w-full max-w-sm">
           
           {/* Título do formulário */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 mt-16">
             <h2 className="text-white font-semibold italic" style={{ fontFamily: 'Inter, sans-serif' }}>
               ACESSE SUA CONTA
             </h2>
@@ -137,26 +138,16 @@ const Login = () => {
               />
             </fieldset>
 
-            {/* Campo de Senha - usando fieldset e legend */}
-            <fieldset className="border border-white border-opacity-40 rounded-md p-2 relative" style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <legend className="text-white text-sm font-medium px-2 uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>
-                SENHA
-              </legend>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full bg-transparent text-white placeholder-white placeholder-opacity-60 focus:outline-none text-base border-none p-0"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-                placeholder="SENHA"
-              />
-            </fieldset>
+            {/* Campo de Senha - usando o componente PasswordField */}
+            <PasswordField
+              label="SENHA"
+              name="password"
+              id="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="SENHA"
+              required={true}
+            />
 
             {/* Link "Esqueci minha senha" - posicionado conforme imagem */}
             <div className="text-right">
