@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useAuth } from '../../hooks/useAuth'
 import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
 import PasswordField from '../../components/PasswordField/PasswordField'
 import Images from '../../assets/image.jsx'
+import authService from '../../services/authService'
 
 /**
  * Página de Login - Mobile First
@@ -9,6 +11,8 @@ import Images from '../../assets/image.jsx'
  * Integração com API: https://localhost:{value}/api/v1/auth/login
  */
 const Login = () => {
+  const { login } = useAuth()
+  
   // Estados para controlar o formulário de login
   const [formData, setFormData] = useState({
     email: '',
@@ -57,13 +61,23 @@ const Login = () => {
       const data = await response.json()
       console.log('Login realizado com sucesso:', data)
       
-      // Armazenar token se necessário (localStorage, sessionStorage, etc.)
-      if (data.token) {
-        localStorage.setItem('authToken', data.token)
+      // Verificar se o login foi bem-sucedido e há um token
+      if (data.success && data.token) {
+        // Usar o contexto de autenticação para fazer login
+        const loginResult = login(data.token)
+        
+        if (loginResult.success) {
+          console.log('Informações do usuário:', loginResult.user)
+          
+          // Usar o método do authService para redirecionamento
+          const redirectUrl = authService.getRedirectUrl()
+          window.location.href = redirectUrl
+        } else {
+          throw new Error(loginResult.error || 'Erro ao processar token')
+        }
+      } else {
+        throw new Error(data.message || 'Erro no login')
       }
-      
-      // Redirecionamento para a página inicial após login bem-sucedido
-      window.location.href = '/'
       
     } catch (err) {
       // Exibir mensagem de erro vermelha

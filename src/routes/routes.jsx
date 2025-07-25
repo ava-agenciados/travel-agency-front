@@ -5,6 +5,9 @@ import Login from '../pages/Login/Login.jsx'
 import PasswordRecovery from '../pages/PasswordRecovery/PasswordRecovery.jsx'
 import Register from '../pages/Register/register.jsx'
 import ResetPassword from '../pages/ResetPassword/ResetPassword.jsx'
+import AdminDashboard from '../pages/Admin/AdminDashboard.jsx'
+import AttendantDashboard from '../pages/Attendant/AttendantDashboard.jsx'
+import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute.jsx'
 
 const Router = () => {
 
@@ -18,6 +21,25 @@ const Router = () => {
                     <Route path='/register' element={<Register/>} />
                     <Route path='/password-recovery' element={<PasswordRecovery/>} />
                     <Route path='/reset-password' element={<ResetPassword/>} />
+                    
+                    {/* Rotas Protegidas */}
+                    <Route 
+                        path='/admin' 
+                        element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminDashboard />
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path='/attendant' 
+                        element={
+                            <ProtectedRoute allowedRoles={['Atendente']}>
+                                <AttendantDashboard />
+                            </ProtectedRoute>
+                        } 
+                    />
+                    
                     <Route path='*' element={<NotFound/>} />
 
                 </Routes>
