@@ -1,9 +1,11 @@
 // Importa useState para gerenciamento de estado local
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom';
 // Importa hook customizado para contexto de autenticação
-import { useAuth } from '../../hooks/useAuth'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { loginAsync } from '../../store/authThunks'
 // Importa componente de menu hambúrguer (não utilizado neste componente)
-import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
+// import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu' // Não utilizado neste componente, pode ser removido
 // Importa componente reutilizável de campo de senha
 import PasswordField from '../../components/PasswordField/PasswordField'
 // Importa imagens utilizadas na página
@@ -17,16 +19,16 @@ import authService from '../../services/authService'
  * Integração com API: https://localhost:{value}/api/v1/auth/login
  */
 const Login = () => {
-  // Desestrutura a função login do contexto de autenticação
-  const { login } = useAuth()
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { loading, error, isAuthenticated, user } = useAppSelector(state => state.auth);
   
   // Estados para controlar o formulário de login
   const [formData, setFormData] = useState({
     email: '',     // Email do usuário
     password: ''   // Senha do usuário
   })
-  const [isLoading, setIsLoading] = useState(false)  // Controla estado de carregamento
-  const [error, setError] = useState('')             // Armazena mensagens de erro
+  // Removido: isLoading, error locais. Usar do Redux.
 
   // Função para lidar com mudanças nos inputs do formulário
   const handleChange = (e) => {
@@ -38,66 +40,30 @@ const Login = () => {
     }))
   }
 
+  // Flag para saber se o login foi manual
+  const [manualLogin, setManualLogin] = useState(false); // Flag para saber se o login foi manual (true após submit do formulário)
+
+  // Sempre que houver erro de login, reseta manualLogin para evitar redirecionamento indevido
+  useEffect(() => {
+    if (error) setManualLogin(false);
+  }, [error]);
+
   // Função para enviar o formulário de login
-  const handleSubmit = async (e) => {
-    e.preventDefault()        // Previne o comportamento padrão do formulário
-    setIsLoading(true)        // Ativa estado de carregamento
-    setError('')              // Limpa erros anteriores
+  const handleSubmit = async (e) => { // Função chamada ao submeter o formulário de login
+    e.preventDefault(); // Previne o comportamento padrão do form (recarregar a página)
+    setManualLogin(true); // Marca que o login foi manual, para controlar o redirecionamento
+    dispatch(loginAsync(formData)); // Dispara a action assíncrona de login
+  };
 
-    try {
-      // Faz requisição para a API de login
-      const response = await fetch('/api/v1/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      })
-
-      // Verifica se a resposta da API foi bem-sucedida
-      if (!response.ok) {
-        // Se a resposta não for ok, trata como credenciais incorretas
-        if (response.status === 401 || response.status === 400) {
-          throw new Error('Email ou senha incorretos.')
-        } else {
-          throw new Error('Erro no servidor. Tente novamente mais tarde.')
-        }
+  // Redireciona após login manual bem-sucedido
+  useEffect(() => { // Efeito para redirecionar após login manual bem-sucedido
+    if (isAuthenticated && manualLogin && !error) { // Só executa se autenticado, login manual e sem erro
+      const redirectUrl = authService.getRedirectUrl(); // Obtém a URL de redirecionamento (pode ser por role, dashboard, etc)
+      if (window.location.pathname !== redirectUrl) { // Só redireciona se já não estiver na página de destino
+        navigate(redirectUrl, { replace: true }); // Redireciona usando React Router, substituindo o histórico
       }
-
-      // Converte a resposta para JSON
-      const data = await response.json()
-      console.log('Login realizado com sucesso:', data)
-      
-      // Verificar se o login foi bem-sucedido e há um token válido
-      if (data.success && data.token) {
-        // Usar o contexto de autenticação para fazer login
-        const loginResult = login(data.token)
-        
-        if (loginResult.success) {
-          console.log('Informações do usuário:', loginResult.user)
-          
-          // Usar o método do authService para redirecionamento baseado no role
-          const redirectUrl = authService.getRedirectUrl()
-          window.location.href = redirectUrl
-        } else {
-          throw new Error(loginResult.error || 'Erro ao processar token')
-        }
-      } else {
-        throw new Error(data.message || 'Erro no login')
-      }
-      
-    } catch (err) {
-      // Exibir mensagem de erro vermelha para o usuário
-      setError(err.message || 'Erro interno do servidor')
-    } finally {
-      // Sempre desativa o loading, independentemente do resultado
-      setIsLoading(false)
     }
-  }
+  }, [isAuthenticated, manualLogin, error, navigate]); 
 
   return (
     // Container principal com fundo escuro
@@ -117,7 +83,7 @@ const Login = () => {
       {/* Layout principal - responsivo: mobile (coluna) e desktop (linha) */}
       <div className="flex min-h-[calc(100vh-80px)]">
         
-        {/* Container do formulário - esquerda no desktop, centro no mobile */}
+      {/* Container do formulário - esquerda no desktop, centro no mobile */}
         <div className="w-full lg:w-3/5 flex items-center justify-center px-6 py-8">
           <div className="w-full max-w-sm">
           
@@ -134,7 +100,6 @@ const Login = () => {
               <div className="flex items-center">
                 <span className="mr-3 text-lg">❌</span>
                 <div>
-                  <p className="font-semibold">Erro de Autenticação</p>
                   <p className="text-red-100">{error}</p>
                 </div>
               </div>
@@ -193,7 +158,7 @@ const Login = () => {
             {/* Botão principal de login - conforme design da imagem */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className="w-full py-4 px-4 text-white font-medium rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-8"
               style={{
                 backgroundColor: 'var(--third-color)',
@@ -201,21 +166,21 @@ const Login = () => {
                 fontFamily: 'Inter, sans-serif'
               }}
               onMouseEnter={(e) => {
-                if (!isLoading) {
+                if (!loading) {
                   e.target.style.backgroundColor = '#1565c0'
                   e.target.style.transform = 'translateY(-1px)'
                   e.target.style.boxShadow = '0 6px 20px rgba(24, 119, 242, 0.4)'
                 }
               }}
               onMouseLeave={(e) => {
-                if (!isLoading) {
+                if (!loading) {
                   e.target.style.backgroundColor = 'var(--third-color)'
                   e.target.style.transform = 'translateY(0)'
                   e.target.style.boxShadow = '0 4px 15px rgba(24, 119, 242, 0.3)'
                 }
               }}
             >
-              {isLoading ? (
+              {loading ? (
                 <div className="flex items-center justify-center">
                   {/* Spinner de loading */}
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

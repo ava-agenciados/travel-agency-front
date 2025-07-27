@@ -1,7 +1,7 @@
 // Importa hooks React para estado e efeitos colaterais
 import { useState, useEffect } from 'react'
 // Importa hook customizado para acessar contexto de autenticação
-import { useAuth } from '../../hooks/useAuth'
+// ...existing code...
 
 /**
  * Dashboard do Administrador

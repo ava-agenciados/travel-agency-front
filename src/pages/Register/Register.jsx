@@ -37,11 +37,41 @@ const Register = () => {
   }
 
   // Função para enviar o formulário de cadastro
+  // Função para validar senha forte
+  const isStrongPassword = (password) => {
+    // Mínimo 9 caracteres, pelo menos 1 número, 1 especial e 1 letra
+    return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{9,}$/.test(password);
+  };
+
+  // Função para validar CPF simples (formato)
+  const isValidCPF = (cpf) => {
+    // Aceita apenas números e 11 dígitos
+    return /^\d{11}$/.test(cpf);
+  };
+
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-    setSuccess('')
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    setSuccess("");
+
+    // Validação front-end
+    if (!isStrongPassword(formData.password)) {
+      setIsLoading(false);
+      setError("A senha deve ter no mínimo 8 caracteres, incluindo número e caractere especial.");
+      return;
+    }
+    if (!isValidCPF(formData.cpfPassport)) {
+      setIsLoading(false);
+      setError("CPF deve conter 11 dígitos numéricos.");
+      return;
+    }
+    // Telefone simples: mínimo 8 dígitos
+    if (!/^\d{8,}$/.test(formData.phoneNumber)) {
+      setIsLoading(false);
+      setError("Telefone deve conter ao menos 8 dígitos numéricos.");
+      return;
+    }
 
     try {
       const response = await fetch('/api/v1/auth/register', {
@@ -58,34 +88,39 @@ const Register = () => {
           email: formData.email,
           password: formData.password
         })
-      })
+      });
 
       if (!response.ok) {
-        if (response.status === 400) {
-          throw new Error('Dados inválidos. Verifique as informações.')
-        } else if (response.status === 409) {
-          throw new Error('Email já cadastrado.')
+        const data = await response.json().catch(() => ({}));
+        // Analisa a mensagem retornada pelo backend para identificar o campo duplicado
+        if (response.status === 401) {
+          if (data.message && data.message.includes('e-mail')) {
+            throw new Error('Email já está em uso.');
+          } else if (data.message && data.message.includes('CPF')) {
+            throw new Error('CPF já está em uso.');
+          } else if (data.message && data.message.includes('telefone')) {
+            throw new Error('Telefone já está em uso.');
+          } else {
+            throw new Error('Usuário já registrado.');
+          }
+        } else if (response.status === 400) {
+          throw new Error('Dados inválidos. Verifique as informações.');
         } else {
-          throw new Error('Erro no servidor. Tente novamente mais tarde.')
+          throw new Error('Erro no servidor. Tente novamente mais tarde.');
         }
       }
 
-      const data = await response.json()
-      console.log('Cadastro realizado com sucesso:', data)
-      
-      setSuccess('Cadastro realizado com sucesso! Redirecionando para login...')
-      
-      // Redirecionamento para a página de login após cadastro bem-sucedido
+      const data = await response.json();
+      setSuccess('Cadastro realizado com sucesso! Redirecionando para login...');
       setTimeout(() => {
-        window.location.href = '/login'
-      }, 2000)
-      
+        window.location.href = '/login';
+      }, 2000);
     } catch (err) {
-      setError(err.message || 'Erro interno do servidor')
+      setError(err.message || 'Erro interno do servidor');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen" style={{
