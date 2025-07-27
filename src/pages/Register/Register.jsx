@@ -6,6 +6,7 @@ import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
 import PasswordField from '../../components/PasswordField/PasswordField'
 // Importa imagens utilizadas na página
 import Images from '../../assets/image.jsx'
+import api from '../../services/api'
 
 /**
  * Página de Cadastro - Mobile First
@@ -74,49 +75,39 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch('/api/v1/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          cpfPassport: formData.cpfPassport,
-          phoneNumber: formData.phoneNumber,
-          email: formData.email,
-          password: formData.password
-        })
-      });
+      const response = await api.post('/api/v1/auth/register', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        cpfPassport: formData.cpfPassport,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email,
+        password: formData.password
+      })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        // Analisa a mensagem retornada pelo backend para identificar o campo duplicado
-        if (response.status === 401) {
-          if (data.message && data.message.includes('e-mail')) {
-            throw new Error('Email já está em uso.');
-          } else if (data.message && data.message.includes('CPF')) {
-            throw new Error('CPF já está em uso.');
-          } else if (data.message && data.message.includes('telefone')) {
-            throw new Error('Telefone já está em uso.');
-          } else {
-            throw new Error('Usuário já registrado.');
-          }
-        } else if (response.status === 400) {
-          throw new Error('Dados inválidos. Verifique as informações.');
-        } else {
-          throw new Error('Erro no servidor. Tente novamente mais tarde.');
-        }
-      }
-
-      const data = await response.json();
-      setSuccess('Cadastro realizado com sucesso! Redirecionando para login...');
+      const data = response.data
+      console.log('Cadastro realizado com sucesso:', data)
+      
+      setSuccess('Cadastro realizado com sucesso! Redirecionando para login...')
+      
+      // Redirecionamento para a página de login após cadastro bem-sucedido
       setTimeout(() => {
         window.location.href = '/login';
       }, 2000);
     } catch (err) {
-      setError(err.message || 'Erro interno do servidor');
+      // Tratamento de erro específico do Axios
+      if (err.response) {
+        if (err.response.status === 400) {
+          setError('Dados inválidos. Verifique as informações.')
+        } else if (err.response.status === 409) {
+          setError('Email já cadastrado.')
+        } else {
+          setError('Erro no servidor. Tente novamente mais tarde.')
+        }
+      } else if (err.request) {
+        setError('Erro de conexão. Verifique sua internet.')
+      } else {
+        setError(err.message || 'Erro interno do servidor')
+      }
     } finally {
       setIsLoading(false);
     }

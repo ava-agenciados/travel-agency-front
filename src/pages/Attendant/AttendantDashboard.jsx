@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react'
  * Protegida pelo ProtectedRoute no sistema de rotas
  */
 const AttendantDashboard = () => {
-  
   return (
     <div>
       {/* Título da página do dashboard do atendente */}

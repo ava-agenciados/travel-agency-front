@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Images from '../../assets/image.jsx'
+import api from '../../services/api'
 
 /**
  * Página de Recuperação de Senha - Mobile First
@@ -49,29 +50,11 @@ const PasswordRecovery = () => {
       }
 
       // Chamada para API de recuperação de senha
-      const response = await fetch('/api/v1/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: email.trim()
-        })
+      const response = await api.post('/api/v1/auth/forgot-password', {
+        email: email.trim()
       })
 
-      if (!response.ok) {
-        // Tratamento de erros específicos
-        if (response.status === 400) {
-          throw new Error('Email não cadastrado.')
-        } else if (response.status === 429) {
-          throw new Error('Muitas tentativas. Tente novamente em alguns minutos.')
-        } else {
-          throw new Error('Erro no servidor. Tente novamente mais tarde.')
-        }
-      }
-
-      const data = await response.json()
+      const data = response.data
       console.log('Email de recuperação enviado:', data)
       
       // Mensagem de sucesso
@@ -79,8 +62,20 @@ const PasswordRecovery = () => {
       setEmail('') // Limpar campo após sucesso
       
     } catch (err) {
-      // Exibir mensagem de erro
-      setError(err.message || 'Erro interno do servidor')
+      // Tratamento de erro específico do Axios
+      if (err.response) {
+        if (err.response.status === 400) {
+          setError('Email não cadastrado.')
+        } else if (err.response.status === 429) {
+          setError('Muitas tentativas. Tente novamente em alguns minutos.')
+        } else {
+          setError('Erro no servidor. Tente novamente mais tarde.')
+        }
+      } else if (err.request) {
+        setError('Erro de conexão. Verifique sua internet.')
+      } else {
+        setError(err.message || 'Erro interno do servidor')
+      }
     } finally {
       setIsLoading(false)
     }

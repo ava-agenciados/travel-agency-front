@@ -1,3 +1,4 @@
+
 // INTEGRAÇÃO COM O BACKEND
 import axios from 'axios';
  
@@ -8,7 +9,6 @@ const api = axios.create({
         'Content-Type': 'application/json',
     }
 });
- 
 // Interceptador para adicionar o token de autenticação ao header em todas as requisições
 api.interceptors.request.use(
     (config) => {
@@ -18,9 +18,7 @@ api.interceptors.request.use(
         }
         return config;
     },
- 
     (error) => Promise.reject(error)
 );
  
 export default api;
- 

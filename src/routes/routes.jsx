@@ -47,7 +47,6 @@ const Router = () => {
                             </ProtectedRoute>
                         } 
                     />
-                    
                     {/* Rota catch-all - qualquer URL não definida mostra página 404 */}
                     <Route path='*' element={<NotFound/>} />
 

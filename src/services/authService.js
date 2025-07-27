@@ -8,7 +8,6 @@ class AuthService {
   constructor() {
     this.TOKEN_KEY = 'authToken'
   }
-
   // Armazena o token no localStorage
   setToken(token) {
     if (token) localStorage.setItem(this.TOKEN_KEY, token)
@@ -37,6 +36,7 @@ class AuthService {
       return null
     }
   }
+
 
   // Verifica se o token ainda é válido (não expirou)
   isTokenValid() {

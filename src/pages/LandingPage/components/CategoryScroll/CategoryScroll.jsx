@@ -85,5 +85,4 @@ function CategoryScroll({ category, selectedIdx, setSelectedIdx }) {
   );
 }
 
-
 export default CategoryScroll;

@@ -12,6 +12,8 @@ import PasswordField from '../../components/PasswordField/PasswordField'
 import Images from '../../assets/image.jsx'
 // Importa serviço de autenticação para funcionalidades auxiliares
 import authService from '../../services/authService'
+import api from '../../services/api'
+
 
 /**
  * Página de Login - Mobile First
@@ -40,6 +42,7 @@ const Login = () => {
     }))
   }
 
+
   // Flag para saber se o login foi manual
   const [manualLogin, setManualLogin] = useState(false); // Flag para saber se o login foi manual (true após submit do formulário)
 
@@ -62,6 +65,58 @@ const Login = () => {
       if (window.location.pathname !== redirectUrl) { // Só redireciona se já não estiver na página de destino
         navigate(redirectUrl, { replace: true }); // Redireciona usando React Router, substituindo o histórico
       }
+
+  // Função para enviar o formulário de login
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const response = await api.post('/api/v1/auth/login', {
+        email: formData.email,
+        password: formData.password
+      })
+
+      const data = response.data
+      console.log('Login realizado com sucesso:', data)
+      
+      // Verificar se o login foi bem-sucedido e há um token
+      if (data.success && data.token) {
+        // Usar o contexto de autenticação para fazer login
+        const loginResult = login(data.token)
+        
+        if (loginResult.success) {
+          console.log('Informações do usuário:', loginResult.user)
+          
+          // Usar o método do authService para redirecionamento
+          const redirectUrl = authService.getRedirectUrl()
+          window.location.href = redirectUrl
+        } else {
+          throw new Error(loginResult.error || 'Erro ao processar token')
+        }
+      } else {
+        throw new Error(data.message || 'Erro no login')
+      }
+      
+    } catch (err) {
+      // Tratamento de erro específico do Axios
+      if (err.response) {
+        // Erro da resposta HTTP
+        if (err.response.status === 401 || err.response.status === 400) {
+          setError('Email ou senha incorretos.')
+        } else {
+          setError('Erro no servidor. Tente novamente mais tarde.')
+        }
+      } else if (err.request) {
+        // Erro de rede
+        setError('Erro de conexão. Verifique sua internet.')
+      } else {
+        // Outros erros
+        setError(err.message || 'Erro interno do servidor')
+      }
+    } finally {
+      setIsLoading(false)
     }
   }, [isAuthenticated, manualLogin, error, navigate]); 
 

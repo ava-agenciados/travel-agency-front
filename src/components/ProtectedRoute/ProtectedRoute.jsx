@@ -1,6 +1,7 @@
 import { useAuth } from '../../hooks/useAuth'; // hook para acessar o contexto de autenticação
 import { useNavigate } from 'react-router-dom'; // hook useNavigate do React Router para navegação
 
+
 /**
  * Componente de Rota Protegida
  * Controla o acesso baseado nas roles do usuário

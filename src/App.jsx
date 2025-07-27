@@ -3,6 +3,7 @@ import { useEffect } from 'react'; // hook useEffect do React, utilizado para ef
 import { useAppDispatch } from './store/hooks'; // hook useAppDispatch para despachar ações para o Redux
 import { restoreAuth } from './store/authActions'; // restaura o estado de autenticação
 
+
 // Componente principal
 function App() {
   const dispatch = useAppDispatch(); // dispatch do Redux para enviar ações

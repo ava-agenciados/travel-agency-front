@@ -73,5 +73,6 @@ const Footer = () => {
   );
 };
 
+
 // Exporta o componente como padrão
 export default Footer;
