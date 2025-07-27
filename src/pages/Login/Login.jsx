@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
-import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
 import PasswordField from '../../components/PasswordField/PasswordField'
 import Images from '../../assets/image.jsx'
 import authService from '../../services/authService'
+import api from '../../services/api'
 
 /**
  * Página de Login - Mobile First
@@ -37,28 +37,12 @@ const Login = () => {
     setError('')
 
     try {
-      const response = await fetch('/api/v1/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Importante para enviar cookies
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
+      const response = await api.post('/api/v1/auth/login', {
+        email: formData.email,
+        password: formData.password
       })
 
-      if (!response.ok) {
-        // Se a resposta não for ok, trata como credenciais incorretas
-        if (response.status === 401 || response.status === 400) {
-          throw new Error('Email ou senha incorretos.')
-        } else {
-          throw new Error('Erro no servidor. Tente novamente mais tarde.')
-        }
-      }
-
-      const data = await response.json()
+      const data = response.data
       console.log('Login realizado com sucesso:', data)
       
       // Verificar se o login foi bem-sucedido e há um token
@@ -80,8 +64,21 @@ const Login = () => {
       }
       
     } catch (err) {
-      // Exibir mensagem de erro vermelha
-      setError(err.message || 'Erro interno do servidor')
+      // Tratamento de erro específico do Axios
+      if (err.response) {
+        // Erro da resposta HTTP
+        if (err.response.status === 401 || err.response.status === 400) {
+          setError('Email ou senha incorretos.')
+        } else {
+          setError('Erro no servidor. Tente novamente mais tarde.')
+        }
+      } else if (err.request) {
+        // Erro de rede
+        setError('Erro de conexão. Verifique sua internet.')
+      } else {
+        // Outros erros
+        setError(err.message || 'Erro interno do servidor')
+      }
     } finally {
       setIsLoading(false)
     }

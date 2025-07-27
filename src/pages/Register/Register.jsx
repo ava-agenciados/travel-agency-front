@@ -2,6 +2,7 @@ import { useState } from 'react'
 import HamburgerMenu from '../../components/HamburgerMenu/HamburgerMenu'
 import PasswordField from '../../components/PasswordField/PasswordField'
 import Images from '../../assets/image.jsx'
+import api from '../../services/api'
 
 /**
  * Página de Cadastro - Mobile First
@@ -39,33 +40,16 @@ const Register = () => {
     setSuccess('')
 
     try {
-      const response = await fetch('/api/v1/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          cpfPassport: formData.cpfPassport,
-          phoneNumber: formData.phoneNumber,
-          email: formData.email,
-          password: formData.password
-        })
+      const response = await api.post('/api/v1/auth/register', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        cpfPassport: formData.cpfPassport,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email,
+        password: formData.password
       })
 
-      if (!response.ok) {
-        if (response.status === 400) {
-          throw new Error('Dados inválidos. Verifique as informações.')
-        } else if (response.status === 409) {
-          throw new Error('Email já cadastrado.')
-        } else {
-          throw new Error('Erro no servidor. Tente novamente mais tarde.')
-        }
-      }
-
-      const data = await response.json()
+      const data = response.data
       console.log('Cadastro realizado com sucesso:', data)
       
       setSuccess('Cadastro realizado com sucesso! Redirecionando para login...')
@@ -76,7 +60,20 @@ const Register = () => {
       }, 2000)
       
     } catch (err) {
-      setError(err.message || 'Erro interno do servidor')
+      // Tratamento de erro específico do Axios
+      if (err.response) {
+        if (err.response.status === 400) {
+          setError('Dados inválidos. Verifique as informações.')
+        } else if (err.response.status === 409) {
+          setError('Email já cadastrado.')
+        } else {
+          setError('Erro no servidor. Tente novamente mais tarde.')
+        }
+      } else if (err.request) {
+        setError('Erro de conexão. Verifique sua internet.')
+      } else {
+        setError(err.message || 'Erro interno do servidor')
+      }
     } finally {
       setIsLoading(false)
     }

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import PasswordField from '../../components/PasswordField/PasswordField'
 import Images from '../../assets/image.jsx'
+import api from '../../services/api'
 
 
 
@@ -129,105 +130,46 @@ const ResetPassword = () => {
 
         try {
 
-            const response = await fetch('/api/v1/auth/reset-password', {
-
-                method: 'PATCH',
-
-                headers: {
-
-                    'Content-Type': 'application/json',
-
-                },
-
-                credentials: 'include',
-
-                body: JSON.stringify({
-
-                    password: formData.password,
-
-                    token: formData.token,
-
-                    email: formData.email
-
-                })
-
+            const response = await api.patch('/api/v1/auth/reset-password', {
+                password: formData.password,
+                token: formData.token,
+                email: formData.email
             })
 
-
-
-            if (!response.ok) {
-
-                if (response.status === 400) {
-
-                    // Tenta extrair os erros de validação do corpo da resposta
-
-                    try {
-
-                        const errorData = await response.json()
-
-                        if (errorData.errors) {
-
-                            // Junta todas as mensagens de erro em uma string
-
-                            const messages = Object.entries(errorData.errors)
-
-                                .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
-
-                                .join(' | ')
-
-                            throw new Error(messages)
-
-                        }
-
-                        // Se tem title, usa ele
-
-                        if (errorData.title) {
-
-                            throw new Error(errorData.title)
-
-                        }
-
-                    } catch (parseError) {
-
-                        // Se não conseguir fazer parse do JSON, usa mensagem padrão
-
-                        console.error('Erro ao fazer parse da resposta de erro:', parseError)
-
-                    }
-
-                    throw new Error('Token inválido ou expirado.')
-
-                } else if (response.status === 404) {
-
-                    throw new Error('Usuário não encontrado.')
-
-                } else {
-
-                    throw new Error('Erro no servidor. Tente novamente mais tarde.')
-
-                }
-
-            }
-
-
-
-            const data = await response.json()
-
+            const data = response.data
             console.log('Senha redefinida com sucesso:', data)
-
             setSuccess('Senha redefinida com sucesso! Redirecionando para login...')
-
             // Redirecionamento para a página de login após redefinição bem-sucedida
-
             setTimeout(() => {
-
                 navigate('/login')
-
             }, 2000)
-
         } catch (err) {
-
-            setError(err.message || 'Erro interno do servidor')
+            // Tratamento de erro específico do Axios
+            if (err.response) {
+                if (err.response.status === 400) {
+                    // Tenta extrair os erros de validação do corpo da resposta
+                    const errorData = err.response.data
+                    if (errorData.errors) {
+                        // Junta todas as mensagens de erro em uma string
+                        const messages = Object.entries(errorData.errors)
+                            .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
+                            .join(' | ')
+                        setError(messages)
+                    } else if (errorData.title) {
+                        setError(errorData.title)
+                    } else {
+                        setError('Token inválido ou expirado.')
+                    }
+                } else if (err.response.status === 404) {
+                    setError('Usuário não encontrado.')
+                } else {
+                    setError('Erro no servidor. Tente novamente mais tarde.')
+                }
+            } else if (err.request) {
+                setError('Erro de conexão. Verifique sua internet.')
+            } else {
+                setError(err.message || 'Erro interno do servidor')
+            }
 
         } finally {
 
