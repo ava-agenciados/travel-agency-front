@@ -16,9 +16,11 @@ const Payment = () => {
         {/* Container principal do conteúdo */}
         <div className="w-full max-w-7xl">
           {/* Layout Desktop */}
-          <div className="flex flex-row gap-8">
+          <div className="hidden lg:flex flex-row gap-8">
             {/* Card: métodos de pagamento */}
-            <PaymentMethods />
+            <div className="flex-1">
+              <PaymentMethods />
+            </div>
 
             {/* Sidebar direita */}
             <div className="flex flex-col gap-6 w-[350px]">
@@ -37,6 +39,29 @@ const Payment = () => {
               {/* Card: Confirma pagamento */}
               <ConfirmPayment />
             </div>
+          </div>
+
+          {/* Layout Mobile */}
+          <div className="lg:hidden flex flex-col gap-6">
+            {/* Card: detalhes do pacote - primeiro no mobile */}
+            <div className="bg-white rounded-xl shadow p-0 flex flex-col overflow-hidden border border-gray-200">
+              <div className="bg-[#FFB800] px-3 py-1 w-fit rounded-br-lg rounded-tl-lg text-xs font-bold absolute mt-2 ml-2 z-10">Detalhes do pacote</div>
+              <div className="relative">
+                <img src="/src/assets/images/bg_herosection.png" alt="Pacote" className="w-full h-28 object-cover" />
+              </div>
+              <div className="p-4">
+                <h3 className="text-base font-bold text-[#223A5F] mb-1">Lorem ipsum sit amet delok sit amet dolok</h3>
+                <p className="text-sm text-gray-600 leading-snug">Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia porro magni quaerat nostrum excepturi. Quasi qui veniam iusto molestias beatae, iste eius voluptatum consectetur et...</p>
+              </div>
+            </div>
+
+            {/* Card: métodos de pagamento - segundo no mobile */}
+            <div className="w-full">
+              <PaymentMethods />
+            </div>
+
+            {/* Card: Confirma pagamento - terceiro no mobile */}
+            <ConfirmPayment />
           </div>
         </div>
       </main>
