@@ -5,11 +5,11 @@ import NotFound from '../pages/NotFound/NotFound.jsx'
 import LandingPage from '../pages/LandingPage/LandingPage.jsx'
 import Login from '../pages/Login/Login.jsx'
 import PasswordRecovery from '../pages/PasswordRecovery/PasswordRecovery.jsx'
-import Register from '../pages/Register/register.jsx'
+import Register from '../pages/Register/Register.jsx'
 import ResetPassword from '../pages/ResetPassword/ResetPassword.jsx'
 import AdminDashboard from '../pages/Admin/AdminDashboard.jsx'
 import AttendantDashboard from '../pages/Attendant/AttendantDashboard.jsx'
-// Importa componente para proteger rotas baseado em roles
+import Payment from '../pages/Payment/Payment.jsx'
 import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute.jsx'
 
 // Componente que define todas as rotas da aplicação
@@ -27,6 +27,7 @@ const Router = () => {
                     <Route path='/register' element={<Register/>} />
                     <Route path='/password-recovery' element={<PasswordRecovery/>} />
                     <Route path='/reset-password' element={<ResetPassword/>} />
+                    <Route path='/payment' element={<Payment/>} />
                     
                     {/* Rotas Protegidas - requerem autenticação e role específico */}
                     {/* Rota para administradores - apenas usuários com role 'Admin' podem acessar */}

@@ -3,7 +3,7 @@ import Bg_HeroSection from './images/bg_herosection.png'     // Imagem de fundo 
 import PalmTree from './images/palm-tree.png'                // Imagem de palmeira decorativa
 import Plan from './images/plan.png'                          // Imagem relacionada a planos
 import LoginPageImage from './images/LoginPageImage.jpg'      // Imagem de fundo da página de login
-
+import IconPayments from './images/IconPayment.png'
 
 // Objeto que centraliza todas as imagens da aplicação
 // Facilita a importação e gerenciamento de assets
@@ -12,6 +12,7 @@ const Images = {
     PalmTree,           // Decoração com palmeira
     Plan,               // Imagem de planos
     LoginPageImage,     // Fundo da página de login
+    IconPayments
 }
 
 // Exporta o objeto Images como padrão para uso em outros componentes
