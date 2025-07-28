@@ -1,5 +1,5 @@
 import { useAuth } from '../../hooks/useAuth'; // hook para acessar o contexto de autenticação
-import { useNavigate } from 'react-router-dom'; // hook useNavigate do React Router para navegação
+import { useNavigate, Navigate } from 'react-router-dom'; // hook useNavigate e Navigate do React Router para navegação
 
 
 /**
@@ -35,14 +35,12 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   // Se não estiver autenticado, redireciona para login
   if (!isAuthenticated) { 
-    navigate('/login'); // Redireciona para a página de login
-    return null; // Retorna null para não renderizar nada enquanto o redirecionamento acontece
+    return <Navigate to="/login" replace />;
   }
 
   // Se não tiver permissão para acessar a rota (role inadequada)
   if (allowedRoles.length > 0 && !hasRole(allowedRoles)) { 
-    navigate('/login'); // Redireciona para a página de login se não tiver a role permitida
-    return null; // Retorna null para não renderizar nada enquanto o redirecionamento acontece
+    return <Navigate to="/login" replace />;
   }
 
   // Se tudo estiver ok (autenticado e com role adequado), renderiza o componente filho

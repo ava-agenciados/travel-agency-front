@@ -20,17 +20,24 @@ import api from '../../services/api'
  * Interface de autenticação com design moderno seguindo o mockup
  * Integração com API: https://localhost:{value}/api/v1/auth/login
  */
+import { logoutAsync } from '../../store/authThunks';
+
 const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { loading, error, isAuthenticated, user } = useAppSelector(state => state.auth);
-  
+
+  // Desloga automaticamente ao acessar a tela de login
+  useEffect(() => {
+    dispatch(logoutAsync());
+    // eslint-disable-next-line
+  }, []);
+
   // Estados para controlar o formulário de login
   const [formData, setFormData] = useState({
     email: '',     // Email do usuário
     password: ''   // Senha do usuário
   })
-  // Removido: isLoading, error locais. Usar do Redux.
 
   // Função para lidar com mudanças nos inputs do formulário
   const handleChange = (e) => {
@@ -52,73 +59,21 @@ const Login = () => {
   }, [error]);
 
   // Função para enviar o formulário de login
-  const handleSubmit = async (e) => { // Função chamada ao submeter o formulário de login
+  const handleSubmit = (e) => {
     e.preventDefault(); // Previne o comportamento padrão do form (recarregar a página)
     setManualLogin(true); // Marca que o login foi manual, para controlar o redirecionamento
     dispatch(loginAsync(formData)); // Dispara a action assíncrona de login
   };
 
   // Redireciona após login manual bem-sucedido
-  useEffect(() => { // Efeito para redirecionar após login manual bem-sucedido
-    if (isAuthenticated && manualLogin && !error) { // Só executa se autenticado, login manual e sem erro
-      const redirectUrl = authService.getRedirectUrl(); // Obtém a URL de redirecionamento (pode ser por role, dashboard, etc)
-      if (window.location.pathname !== redirectUrl) { // Só redireciona se já não estiver na página de destino
-        navigate(redirectUrl, { replace: true }); // Redireciona usando React Router, substituindo o histórico
+  useEffect(() => {
+    if (isAuthenticated && manualLogin && !error) {
+      const redirectUrl = authService.getRedirectUrl();
+      if (window.location.pathname !== redirectUrl) {
+        navigate(redirectUrl, { replace: true });
       }
-
-  // Função para enviar o formulário de login
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-
-    try {
-      const response = await api.post('/api/v1/auth/login', {
-        email: formData.email,
-        password: formData.password
-      })
-
-      const data = response.data
-      console.log('Login realizado com sucesso:', data)
-      
-      // Verificar se o login foi bem-sucedido e há um token
-      if (data.success && data.token) {
-        // Usar o contexto de autenticação para fazer login
-        const loginResult = login(data.token)
-        
-        if (loginResult.success) {
-          console.log('Informações do usuário:', loginResult.user)
-          
-          // Usar o método do authService para redirecionamento
-          const redirectUrl = authService.getRedirectUrl()
-          window.location.href = redirectUrl
-        } else {
-          throw new Error(loginResult.error || 'Erro ao processar token')
-        }
-      } else {
-        throw new Error(data.message || 'Erro no login')
-      }
-      
-    } catch (err) {
-      // Tratamento de erro específico do Axios
-      if (err.response) {
-        // Erro da resposta HTTP
-        if (err.response.status === 401 || err.response.status === 400) {
-          setError('Email ou senha incorretos.')
-        } else {
-          setError('Erro no servidor. Tente novamente mais tarde.')
-        }
-      } else if (err.request) {
-        // Erro de rede
-        setError('Erro de conexão. Verifique sua internet.')
-      } else {
-        // Outros erros
-        setError(err.message || 'Erro interno do servidor')
-      }
-    } finally {
-      setIsLoading(false)
     }
-  }, [isAuthenticated, manualLogin, error, navigate]); 
+  }, [isAuthenticated, manualLogin, error, navigate]);
 
   return (
     // Container principal com fundo escuro

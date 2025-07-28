@@ -102,6 +102,7 @@ class AuthService {
     const redirectUrls = {
       Admin: '/admin',
       Atendente: '/attendant',
+      Cliente: '/',
       default: '/'
     }
 

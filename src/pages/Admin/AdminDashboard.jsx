@@ -1,15 +1,16 @@
 // Importa hooks React para estado e efeitos colaterais
-import { useState, useEffect } from 'react'
-// Importa hook customizado para acessar contexto de autenticação
-// ...existing code...
+
+import LogoutButton from '../../components/LogoutButton';
 
 /**
  * Dashboard do Administrador
  * Área exclusiva para usuários com role "Admin"
  * Protegida pelo ProtectedRoute no sistema de rotas
  */
+
 const AdminDashboard = () => {
     return <>
+        <LogoutButton />
         {/* Conteúdo temporário - placeholder para desenvolvimento futuro */}
         <p>Page adm</p>
     </>

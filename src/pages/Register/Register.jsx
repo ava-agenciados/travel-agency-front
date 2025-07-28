@@ -40,8 +40,8 @@ const Register = () => {
   // Função para enviar o formulário de cadastro
   // Função para validar senha forte
   const isStrongPassword = (password) => {
-    // Mínimo 9 caracteres, pelo menos 1 número, 1 especial e 1 letra
-    return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{9,}$/.test(password);
+    // Mínimo 8 caracteres, pelo menos 1 número, 1 especial e 1 letra
+    return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(password);
   };
 
   // Função para validar CPF simples (formato)
@@ -98,8 +98,8 @@ const Register = () => {
       if (err.response) {
         if (err.response.status === 400) {
           setError('Dados inválidos. Verifique as informações.')
-        } else if (err.response.status === 409) {
-          setError('Email já cadastrado.')
+        } else if (err.response.status === 401) {
+          setError('Email ou CPF já cadastrados.')
         } else {
           setError('Erro no servidor. Tente novamente mais tarde.')
         }
