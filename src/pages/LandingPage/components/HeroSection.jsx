@@ -83,7 +83,22 @@ return (
             </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 ">
+            <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">
+                Onde você está?
+            </label>
+            <input
+                type="text"
+                placeholder="Ex: Recife"
+                className="px-4 py-2 border rounded-md w-full text-sm"
+            />
+            
+            <div className="mt-2 flex items-center text-xs text-gray-500">
+                <input id="workTrip" type="checkbox" className="mr-2" />
+                <label htmlFor="workTrip">Estou viajando a trabalho</label>
+            </div>
+            </div>
             <div className="flex flex-col">
             <label className="text-sm text-gray-600 mb-1">
                 Para onde você vai?
@@ -93,10 +108,6 @@ return (
                 placeholder="Ex: Rio de Janeiro"
                 className="px-4 py-2 border rounded-md w-full text-sm"
             />
-            <div className="mt-2 flex items-center text-xs text-gray-500">
-                <input id="workTrip" type="checkbox" className="mr-2" />
-                <label htmlFor="workTrip">Estou viajando a trabalho</label>
-            </div>
             </div>
 
             <div className="flex flex-col">
@@ -131,18 +142,8 @@ return (
                 />
             </div>
             </div>
-
             <div className="flex flex-col">
-            <label className="text-sm text-gray-600 mb-1">
-                Passageiros
-            </label>
-            <div className="flex items-center gap-2">
-                <input
-                type="number"
-                min="1"
-                defaultValue="1"
-                className="px-3 py-2 border rounded-md text-sm w-full no-spinner"
-                />
+
                 <button className="bg-[#1877F2] text-white p-2 rounded-md shadow-md hover:bg-[#165ecb] transition">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -160,7 +161,7 @@ return (
                 </svg>
                 </button>
             </div>
-            </div>
+
         </div>
         </div>
 

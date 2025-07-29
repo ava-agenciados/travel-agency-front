@@ -6,7 +6,7 @@ import LoginPageImage from './images/LoginPageImage.jpg'
 const Images = {
     Bg_HeroSection,
     PalmTree,
-    Plan
+    Plan,
     LoginPageImage,
 }
 
