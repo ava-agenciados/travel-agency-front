@@ -1,6 +1,9 @@
+
 import { useState } from "react";
 import BookingsContent from "./BookingsContent";
 import RatingsContent from "./RatingsContent";
+
+const API_BASE_URL = "http://localhost:5110"; // endereço real do backend para imagens e API
 
 const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
 
@@ -16,6 +19,9 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
   // Estado para edição de pacote
+  // Estado para visualização de mídias
+  const [viewMediaLoading, setViewMediaLoading] = useState(false);
+  const [viewMedia, setViewMedia] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState(null); // será preenchido ao abrir modal
   const [editMedia, setEditMedia] = useState([]); // mídias atuais do pacote
@@ -24,9 +30,23 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
   const [editError, setEditError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   // Abrir modal de visualizar/editar
-  const handleView = (pkg) => {
+  const handleView = async (pkg) => {
     setSelectedPackage(pkg);
     setShowModal(true);
+    setViewMediaLoading(true);
+    setViewMedia([]);
+    try {
+      const res = await fetch(`/api/v1/dashboard/packages/${pkg.id}/media`);
+      if (res.ok) {
+        const media = await res.json();
+        setViewMedia(Array.isArray(media) ? media : []);
+      } else {
+        setViewMedia([]);
+      }
+    } catch {
+      setViewMedia([]);
+    }
+    setViewMediaLoading(false);
   };
   // Carregar mídias do pacote ao abrir modal de edição
   const handleOpenEdit = async (pkg) => {
@@ -402,8 +422,8 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
               {/* Fotos do pacote no topo */}
               {editMedia.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-center mb-2">
-                  {editMedia.filter(m => m.url && m.url.match(/\.(jpg|jpeg|png|gif|webp)$/i)).map((media, idx) => (
-                    <img key={idx} src={media.url} alt={media.name} className="w-32 h-20 object-cover rounded shadow" />
+                  {editMedia.filter(m => m.name && m.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)).map((media, idx) => (
+                    <img key={idx} src={`${API_BASE_URL}/uploads/${editForm.id}/${media.name}`} alt={media.name} className="w-32 h-20 object-cover rounded shadow" />
                   ))}
                 </div>
               )}
@@ -444,7 +464,6 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                         setEditLoading(false);
                         return;
                       }
-                      let updatedPackage = { ...editForm, ...patchPayload };
                       // Upload de novas mídias
                       if (editMediaFiles.length > 0) {
                         const formData = new FormData();
@@ -459,9 +478,18 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                           return;
                         }
                       }
-                      // Atualiza a lista localmente
-                      if (typeof onPackageUpdate === 'function') {
-                        onPackageUpdate(updatedPackage);
+                      // Buscar lista atualizada de pacotes após edição
+                      try {
+                        const allRes = await fetch('/api/v1/dashboard/packages/all');
+                        if (allRes.ok) {
+                          const allPackages = await allRes.json();
+                          if (typeof onPackageUpdate === 'function') {
+                            onPackageUpdate(null, allPackages); // novo contrato: (updatedPackage, allPackages)
+                          }
+                        }
+                      } catch (err) {
+                        // Se falhar, não impede o fechamento do modal
+                        console.error('Erro ao buscar pacotes atualizados:', err);
                       }
                       setShowEditModal(false);
                       setEditForm(null);
@@ -517,14 +545,21 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                   </label>
                   <label className="flex flex-col gap-1">
                     Quantidade
-                    <input type="number" className="border rounded px-2 py-1" value={editForm.quantity} onChange={e => setEditForm(f => ({ ...f, quantity: e.target.value }))} required min="0" />
+                    <input
+                      type="number"
+                      className="border rounded px-2 py-1"
+                      value={typeof editForm.quantity === 'number' ? editForm.quantity : (editForm.quantity ? Number(editForm.quantity) : '')}
+                      onChange={e => setEditForm(f => ({ ...f, quantity: e.target.value }))}
+                      required
+                      min="0"
+                    />
                   </label>
                   <label className="flex flex-row gap-2 items-center">
                     <input type="checkbox" checked={!!editForm.isAvailable} onChange={e => setEditForm(f => ({ ...f, isAvailable: e.target.checked }))} /> Disponível
                   </label>
                   <label className="flex flex-col gap-1">
                     URL da Imagem (opcional)
-                    <input type="text" className="border rounded px-2 py-1" value={editForm.imageUrl || ''} onChange={e => setEditForm(f => ({ ...f, imageUrl: e.target.value }))} />
+                    <input type="text" className="border rounded px-2 py-1" value={editForm.imageUrl} onChange={e => setEditForm(f => ({ ...f, imageUrl: e.target.value }))} />
                   </label>
                   {/* Hospedagem (opcional) */}
                   <div className="flex flex-col gap-2 mt-2 p-2 border rounded bg-gray-50">
@@ -604,37 +639,58 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                     {editMedia.length === 0 ? (
                       <span className="text-gray-500">Nenhuma mídia cadastrada.</span>
                     ) : (
-                      <ul className="flex flex-wrap gap-2">
-                        {editMedia.map((media, idx) => (
-                          <li key={idx} className="flex flex-col items-center border rounded p-2 bg-white">
-                            {/* Exibe imagem ou nome do arquivo */}
-                            {media.url ? (
-                              <img src={media.url} alt={media.name} className="w-24 h-16 object-cover rounded mb-1" />
-                            ) : (
-                              <span className="text-xs">{media.name}</span>
-                            )}
-                            <button
-                              type="button"
-                              className="mt-1 px-2 py-1 rounded bg-red-500 text-white text-xs hover:bg-red-600"
-                              onClick={async () => {
-                                setEditLoading(true);
-                                setEditError("");
-                                try {
-                                  const res = await fetch(`/api/v1/dashboard/packages/${editForm.id}/media/${encodeURIComponent(media.name)}`, { method: 'DELETE' });
-                                  if (res.ok) {
-                                    setEditMedia(m => m.filter((_, i) => i !== idx));
-                                  } else {
+                      <>
+                        {/* Galeria visual das imagens do pacote */}
+                        <div className="flex flex-wrap gap-2 mb-2 justify-center">
+                          {editMedia
+                            .filter(m => m.name && m.name.match(/\.(jpg|jpeg|png|gif|webp)$/i))
+                            .map((media, idx) => (
+                              <img
+                                key={idx}
+                                src={media.url ? media.url : `${API_BASE_URL}/uploads/${editForm.id}/${media.name}`}
+                                alt={media.name}
+                                className="w-32 h-20 object-cover rounded shadow"
+                              />
+                            ))}
+                        </div>
+                        {/* Lista de mídias com botão Excluir */}
+                        <ul className="flex flex-wrap gap-2">
+                          {editMedia.map((media, idx) => (
+                            <li key={idx} className="flex flex-col items-center border rounded p-2 bg-white">
+                              {/* Exibe imagem ou nome do arquivo */}
+                              {media.url ? (
+                                <img src={media.url} alt={media.name} className="w-24 h-16 object-cover rounded mb-1" />
+                              ) : (
+                                <span className="text-xs">{media.name}</span>
+                              )}
+                              <button
+                                type="button"
+                                className="mt-1 px-2 py-1 rounded bg-red-500 text-white text-xs hover:bg-red-600"
+                                onClick={async () => {
+                                  setEditLoading(true);
+                                  setEditError("");
+                                  try {
+                                    // Recupera o token JWT do localStorage
+                                    const token = localStorage.getItem('authToken');
+                                    const res = await fetch(`${API_BASE_URL}/api/v1/dashboard/packages/media/${media.id}`, {
+                                      method: 'DELETE',
+                                      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                                    });
+                                    if (res.ok) {
+                                      setEditMedia(m => m.filter((_, i) => i !== idx));
+                                    } else {
+                                      setEditError('Erro ao excluir mídia.');
+                                    }
+                                  } catch {
                                     setEditError('Erro ao excluir mídia.');
                                   }
-                                } catch {
-                                  setEditError('Erro ao excluir mídia.');
-                                }
-                                setEditLoading(false);
-                              }}
-                            >Excluir</button>
-                          </li>
-                        ))}
-                      </ul>
+                                  setEditLoading(false);
+                                }}
+                              >Excluir</button>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
                     )}
                   </div>
                   {/* Upload de novas mídias */}
@@ -665,11 +721,58 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
               {/* Fotos do pacote */}
               {viewMediaLoading ? (
                 <div className="text-blue-500">Carregando fotos...</div>
-              ) : viewMedia && viewMedia.length > 0 ? (
-                <div className="flex flex-wrap gap-2 justify-center mb-2">
-                  {viewMedia.filter(m => m.url && m.url.match(/\.(jpg|jpeg|png|gif|webp)$/i)).map((media, idx) => (
-                    <img key={idx} src={media.url} alt={media.name} className="w-32 h-20 object-cover rounded shadow" />
-                  ))}
+              ) : (selectedPackage && Array.isArray(selectedPackage.packageMedia) && selectedPackage.packageMedia.length > 0) ? (
+                <div className="flex flex-wrap gap-2 justify-center mb-4">
+                  {(() => {
+                    console.log('selectedPackage.packageMedia:', selectedPackage.packageMedia);
+                    return selectedPackage.packageMedia
+                      .filter(m => {
+                        if (typeof m === 'object' && m.mediaUrl) {
+                          return m.mediaUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                        }
+                        if (typeof m === 'string') {
+                          return m.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                        }
+                        return false;
+                      })
+                      .map((media, idx) => {
+                        let url = '';
+                        if (typeof media === 'object' && media.mediaUrl) {
+                          url = media.mediaUrl.replace(/\\/g, '/');
+                        } else if (typeof media === 'string') {
+                          url = media.replace(/\\/g, '/');
+                        }
+                        if (!url.startsWith('http')) {
+                          url = `${API_BASE_URL}${url.startsWith('/') ? url : '/' + url}`;
+                        }
+                        console.log('Imagem renderizada:', url);
+                        return (
+                          <img
+                            key={idx}
+                            src={url}
+                            alt={url.split('/').pop()}
+                            className="w-32 h-20 object-cover rounded shadow"
+                          />
+                        );
+                      });
+                  })()}
+                </div>
+              ) : (viewMedia && viewMedia.length > 0 && selectedPackage && selectedPackage.id) ? (
+                <div className="flex flex-wrap gap-2 justify-center mb-4">
+                  {viewMedia
+                    .filter(m => m.name && m.name.match(/\.(jpg|jpeg|png|gif|webp)$/i))
+                    .map((media, idx) => {
+                      const url = `${API_BASE_URL}/uploads/${selectedPackage.id}/${media.name}`;
+                      console.log('Imagem renderizada (viewMedia):', url);
+                      return (
+                        <img
+                          key={idx}
+                          src={url}
+                          alt={media.name}
+                          className="w-32 h-20 object-cover rounded shadow"
+                        />
+                      );
+                    })}
                 </div>
               ) : null}
               <div className="flex flex-col gap-2 text-base">

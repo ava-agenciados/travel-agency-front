@@ -25,8 +25,39 @@ const AdminDashboard = () => {
               throw new Error('Erro ao buscar pacotes');
             }
             const data = await response.json();
-            setAllPackages(data);
-            setPackages(data);
+            // ...
+            // Garante que cada pacote tenha o campo packageMedia (array de objetos {id, path})
+            const packagesWithMedia = await Promise.all(
+              data.map(async (pkg) => {
+                try {
+                  const mediaRes = await fetch(`/api/v1/dashboard/packages/${pkg.id}/media`);
+                  if (mediaRes.ok) {
+                    const mediaArr = await mediaRes.json();
+                    // Normaliza para array de objetos { id, path }
+                    let normalizedMedia = [];
+                    if (Array.isArray(mediaArr) && mediaArr.length > 0) {
+                      normalizedMedia = mediaArr.map(m => {
+                        // Se já vier {id, path}, mantém; senão tenta montar
+                        if (m && typeof m === 'object' && m.id && (m.path || m.url || m.name)) {
+                          return {
+                            id: m.id,
+                            path: m.path || m.url || (m.name ? `/uploads/${pkg.id}/${m.name}` : null)
+                          };
+                        } else if (typeof m === 'string') {
+                          // Caso seja só o caminho
+                          return { id: null, path: m };
+                        }
+                        return null;
+                      }).filter(Boolean);
+                    }
+                    return { ...pkg, packageMedia: normalizedMedia };
+                  }
+                } catch (err) {}
+                return { ...pkg, packageMedia: [] };
+              })
+            );
+            setAllPackages(packagesWithMedia);
+            setPackages(packagesWithMedia);
           } catch (error) {
             console.error('Erro:', error);
             setAllPackages([]);
@@ -38,8 +69,14 @@ const AdminDashboard = () => {
     }, [selectedMenu]);
 
     // Atualiza pacote na lista após edição
-    const handlePackageUpdate = (updatedPackage) => {
-      setPackages((prev) => prev.map(pkg => (pkg.id === updatedPackage.id || pkg.packageId === updatedPackage.id) ? { ...pkg, ...updatedPackage } : pkg));
+    const handlePackageUpdate = (updatedPackage, allPackages) => {
+      if (!updatedPackage && Array.isArray(allPackages)) {
+        setPackages(allPackages);
+        setAllPackages(allPackages);
+        return;
+      }
+      if (!updatedPackage || !updatedPackage.id) return;
+      setPackages((prev) => prev.map(pkg => (pkg && (pkg.id === updatedPackage.id || pkg.packageId === updatedPackage.id)) ? { ...pkg, ...updatedPackage } : pkg));
     };
 
     // Handler de busca (filtro local, pode ser adaptado para busca na API)
