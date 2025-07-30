@@ -3,7 +3,7 @@ import { useState } from "react";
 import BookingsContent from "./BookingsContent";
 import RatingsContent from "./RatingsContent";
 
-const API_BASE_URL = "http://localhost:5110"; // endereço real do backend para imagens e API
+const API_BASE_URL = "https://localhost:8080"; // endereço real do backend para imagens e API
 
 const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
 
