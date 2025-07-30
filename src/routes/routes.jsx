@@ -11,6 +11,8 @@ import AdminDashboard from '../pages/Admin/AdminDashboard.jsx'
 import AttendantDashboard from '../pages/Attendant/AttendantDashboard.jsx'
 import Payment from '../pages/Payment/Payment.jsx'
 import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute.jsx'
+import UserProfile from '../pages/UserProfile/UserProfile.jsx'
+
 
 // Componente que define todas as rotas da aplicação
 const Router = () => {
@@ -28,6 +30,8 @@ const Router = () => {
                     <Route path='/password-recovery' element={<PasswordRecovery/>} />
                     <Route path='/reset-password' element={<ResetPassword/>} />
                     <Route path='/payment' element={<Payment/>} />
+                    <Route path='/user-profile' element={<UserProfile/>} />
+
                     
                     {/* Rotas Protegidas - requerem autenticação e role específico */}
                     {/* Rota para administradores - apenas usuários com role 'Admin' podem acessar */}
