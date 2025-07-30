@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import api from "../../services/api";
 
 // Recebe opcionalmente a lista de pacotes para mapear nomes
 const BookingsContent = ({ packages = [] }) => {
@@ -16,10 +17,8 @@ const BookingsContent = ({ packages = [] }) => {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch("/api/v1/dashboard/bookings");
-        if (!res.ok) throw new Error("Erro ao buscar reservas");
-        const data = await res.json();
-        setBookings(data);
+        const res = await api.get("/api/v1/dashboard/bookings");
+        setBookings(res.data);
       } catch (err) {
         setError("Erro ao buscar reservas");
       }
@@ -37,13 +36,9 @@ const BookingsContent = ({ packages = [] }) => {
     if (!window.confirm(`Tem certeza que deseja excluir a reserva de ${booking.contractingUser?.email || booking.customerName || booking.cliente || "cliente"}?`)) return;
     try {
       const bookingId = booking.id || booking.bookingId;
-      const res = await fetch(`/api/v1/dashboard/bookings/${bookingId}`, { method: "DELETE" });
-      if (res.ok) {
-        setBookings((prev) => prev.filter(b => (b.id || b.bookingId) !== bookingId));
-        setShowModal(false);
-      } else {
-        alert("Erro ao excluir reserva.");
-      }
+      await api.delete(`/api/v1/dashboard/bookings/${bookingId}`);
+      setBookings((prev) => prev.filter(b => (b.id || b.bookingId) !== bookingId));
+      setShowModal(false);
     } catch {
       alert("Erro ao excluir reserva.");
     }

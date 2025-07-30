@@ -2,6 +2,7 @@
 import { useState } from "react";
 import BookingsContent from "./BookingsContent";
 import RatingsContent from "./RatingsContent";
+import api from "../../services/api";
 
 const API_BASE_URL = "http://localhost:5110"; // endereço real do backend para imagens e API
 

@@ -1,6 +1,7 @@
 
 
 import { useEffect, useState } from "react";
+import api from "../../services/api";
 
 const RatingsContent = () => {
   const [packages, setPackages] = useState([]);
@@ -19,10 +20,8 @@ const RatingsContent = () => {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch("/api/v1/dashboard/packages/all");
-        if (!res.ok) throw new Error("Erro ao buscar pacotes");
-        const data = await res.json();
-        setPackages(data);
+        const res = await api.get("/api/v1/dashboard/packages/all");
+        setPackages(res.data);
       } catch (err) {
         setError(err.message || "Erro ao buscar pacotes");
       }
