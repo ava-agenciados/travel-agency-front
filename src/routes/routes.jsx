@@ -12,6 +12,8 @@ import AttendantDashboard from '../pages/Attendant/AttendantDashboard.jsx'
 import Payment from '../pages/Payment/Payment.jsx'
 import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute.jsx'
 import UserProfile from '../pages/UserProfile/UserProfile.jsx'
+import Layout from '../components/UserProfile/Layout.jsx'
+import MyBookings from '../pages/UserProfile/MyBookings.jsx'
 
 
 // Componente que define todas as rotas da aplicação
@@ -30,7 +32,13 @@ const Router = () => {
                     <Route path='/password-recovery' element={<PasswordRecovery/>} />
                     <Route path='/reset-password' element={<ResetPassword/>} />
                     <Route path='/payment' element={<Payment/>} />
-                    <Route path='/user-profile' element={<UserProfile/>} />
+
+
+                    {/* Rota pai */}
+                    <Route path="/" element={<Layout/>}>
+                        <Route path="userdata" element={<UserProfile/>} />
+                        <Route path="mybookings" element={<MyBookings/>} />
+                    </Route>
 
                     
                     {/* Rotas Protegidas - requerem autenticação e role específico */}
