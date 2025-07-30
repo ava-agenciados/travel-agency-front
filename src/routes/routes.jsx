@@ -34,8 +34,15 @@ const Router = () => {
                     <Route path='/payment' element={<Payment/>} />
 
 
-                    {/* Rota pai */}
-                    <Route path="/" element={<Layout/>}>
+                    {/* Rota pai protegida para clientes */}
+                    <Route 
+                        path="/" 
+                        element={
+                            <ProtectedRoute allowedRoles={['Cliente']}>
+                                <Layout/>
+                            </ProtectedRoute>
+                        }
+                    >
                         <Route path="userdata" element={<UserProfile/>} />
                         <Route path="mybookings" element={<MyBookings/>} />
                     </Route>
