@@ -1,17 +1,28 @@
 import PaymentSteps from '../../components/Payment/PaymentSteps';
 import PaymentMethods from '../../components/Payment/PaymentMethods';
 import ConfirmPayment from '../../components/Payment/ConfirmPayment';
+import { useRef } from 'react';
 
 import NavBar from '../../components/Navbar/NavBar';
 import Footer from '../../components/Footer/Footer';
 
 const Payment = () => {
+  // Referência para acessar a função de confirmação do PaymentMethods
+  const paymentMethodsRef = useRef();
+
+  // Handler para passar para ConfirmPayment
+  const handleConfirm = () => {
+    if (paymentMethodsRef.current && paymentMethodsRef.current.handleConfirm) {
+      paymentMethodsRef.current.handleConfirm();
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#EBECF0]">
       <NavBar />
       <main className="flex-1 flex flex-col items-center py-8 px-4">
         {/* Component: Etapas do pagamento */}
-        <PaymentSteps currentStep={3} /> 
+        <PaymentSteps currentStep={3} />
 
         {/* Container principal do conteúdo */}
         <div className="w-full max-w-7xl">
@@ -19,7 +30,7 @@ const Payment = () => {
           <div className="hidden lg:flex flex-row gap-8">
             {/* Card: métodos de pagamento */}
             <div className="flex-1">
-              <PaymentMethods />
+              <PaymentMethods ref={paymentMethodsRef} />
             </div>
 
             {/* Sidebar direita */}
@@ -37,7 +48,7 @@ const Payment = () => {
               </div>
 
               {/* Card: Confirma pagamento */}
-              <ConfirmPayment />
+              <ConfirmPayment onConfirm={handleConfirm} />
             </div>
           </div>
 
@@ -57,11 +68,11 @@ const Payment = () => {
 
             {/* Card: métodos de pagamento - segundo no mobile */}
             <div className="w-full">
-              <PaymentMethods />
+              <PaymentMethods ref={paymentMethodsRef} />
             </div>
 
             {/* Card: Confirma pagamento - terceiro no mobile */}
-            <ConfirmPayment />
+            <ConfirmPayment onConfirm={handleConfirm} />
           </div>
         </div>
       </main>

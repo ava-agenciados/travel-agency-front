@@ -1,4 +1,4 @@
-const ConfirmPayment = () => {
+const ConfirmPayment = ({ onConfirm }) => {
   return (
     <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-2">
       <h4 className="text-sm font-bold mb-2">Resumo</h4>
@@ -13,7 +13,7 @@ const ConfirmPayment = () => {
         <span>Total</span>
         <span>868,34</span>
       </div>
-      <button className="mt-4 bg-[#223A5F] text-white font-bold rounded-lg py-2">Confirmar pedido</button>
+      <button className="mt-4 bg-[#223A5F] text-white font-bold rounded-lg py-2" onClick={onConfirm}>Confirmar pedido</button>
     </div>
   );
 };
