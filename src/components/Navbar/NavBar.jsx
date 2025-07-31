@@ -8,7 +8,7 @@ const NavBar = () => {
   return (
     <header className="bg-gray-100 w-full border-b border-gray-200">
       <div className="max-w-9xl mx-auto px-4 py-4 flex items-center justify-between">
-        <p className="text-xl font-extrabold text-gray-800">New Horizon</p>
+        <a href="/"><p className="text-xl font-extrabold text-gray-800">New Horizon</p></a>
 
         <nav className="flex items-center gap-6 text-sm text-gray-700 font-semibold">
           <ul className="hidden md:flex items-center gap-6">
