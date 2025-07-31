@@ -1,9 +1,88 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BookingsContent from "./BookingsContent";
 import RatingsContent from "./RatingsContent";
 
 const API_BASE_URL = "https://localhost:8080"; // endereço real do backend para imagens e API
+
+// Hook personalizado para carregar imagem como blob (resolve problemas de CORS)
+const useImageBlob = (imageUrl) => {
+  const [blobUrl, setBlobUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!imageUrl) return;
+    
+    const loadImage = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(imageUrl, {
+          mode: 'cors',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          setBlobUrl(url);
+        } else {
+          throw new Error('Falha ao carregar imagem');
+        }
+      } catch (err) {
+        console.error('Erro ao carregar imagem como blob:', err);
+        setError(err);
+        // Fallback: tenta usar a URL diretamente
+        setBlobUrl(imageUrl);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadImage();
+
+    return () => {
+      if (blobUrl && blobUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [imageUrl]);
+
+  return { blobUrl, loading, error };
+};
+
+// Componente para renderizar imagem com fallback
+const ImageWithFallback = ({ src, alt, className, ...props }) => {
+  const { blobUrl, loading, error } = useImageBlob(src);
+  const [fallbackMode, setFallbackMode] = useState(false);
+
+  if (loading) {
+    return <div className={`${className} bg-gray-200 flex items-center justify-center`}>Carregando...</div>;
+  }
+
+  const handleError = (e) => {
+    console.error('Erro ao renderizar imagem:', src);
+    if (!fallbackMode) {
+      setFallbackMode(true);
+      e.target.src = src; // Tenta URL direta
+    } else {
+      e.target.style.display = 'none'; // Oculta se falhar completamente
+    }
+  };
+
+  return (
+    <img
+      src={fallbackMode ? src : (blobUrl || src)}
+      alt={alt}
+      className={className}
+      onError={handleError}
+      onLoad={() => console.log('Imagem renderizada com sucesso:', src)}
+      {...props}
+    />
+  );
+};
 
 const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
 
@@ -33,6 +112,7 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
   const handleView = async (pkg) => {
     console.log('Pacote selecionado:', pkg);
     console.log('beginDate:', pkg.beginDate, 'endDate:', pkg.endDate);
+    console.log('packageMedia:', pkg.packageMedia);
     setSelectedPackage(pkg);
     setShowModal(true);
     setViewMediaLoading(true);
@@ -41,6 +121,8 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
       const res = await fetch(`/api/v1/dashboard/packages/${pkg.id}/media`);
       if (res.ok) {
         const media = await res.json();
+        console.log('Media da API:', media);
+        console.log('Estrutura do primeiro item:', media[0]);
         setViewMedia(Array.isArray(media) ? media : []);
       } else {
         setViewMedia([]);
@@ -791,60 +873,67 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
               {/* Fotos do pacote */}
               {viewMediaLoading ? (
                 <div className="text-blue-500">Carregando fotos...</div>
-              ) : (selectedPackage && Array.isArray(selectedPackage.packageMedia) && selectedPackage.packageMedia.length > 0) ? (
+              ) : (
                 <div className="flex flex-wrap gap-2 justify-center mb-4">
-                  {(() => {
-                    console.log('selectedPackage.packageMedia:', selectedPackage.packageMedia);
-                    return selectedPackage.packageMedia
-                      .filter(m => {
-                        if (typeof m === 'object' && m.mediaUrl) {
-                          return m.mediaUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                        }
-                        if (typeof m === 'string') {
-                          return m.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                        }
-                        return false;
-                      })
-                      .map((media, idx) => {
-                        let url = '';
-                        if (typeof media === 'object' && media.mediaUrl) {
-                          url = media.mediaUrl.replace(/\\/g, '/');
-                        } else if (typeof media === 'string') {
-                          url = media.replace(/\\/g, '/');
-                        }
-                        if (!url.startsWith('http')) {
-                          url = `${API_BASE_URL}${url.startsWith('/') ? url : '/' + url}`;
-                        }
-                        console.log('Imagem renderizada:', url);
-                        return (
-                          <img
-                            key={idx}
-                            src={url}
-                            alt={url.split('/').pop()}
-                            className="w-32 h-20 object-cover rounded shadow"
-                          />
-                        );
-                      });
-                  })()}
-                </div>
-              ) : (viewMedia && viewMedia.length > 0 && selectedPackage && selectedPackage.id) ? (
-                <div className="flex flex-wrap gap-2 justify-center mb-4">
-                  {viewMedia
-                    .filter(m => m.name && m.name.match(/\.(jpg|jpeg|png|gif|webp)$/i))
+                  {console.log('Renderizando imagens. viewMedia:', viewMedia, 'selectedPackage.packageMedia:', selectedPackage?.packageMedia)}
+                  
+                  {/* Renderiza imagens de viewMedia (da API) */}
+                  {viewMedia && viewMedia.length > 0 && viewMedia
+                    .filter(media => {
+                      console.log('Processando media item:', media);
+                      // Verifica diferentes propriedades para o nome do arquivo
+                      const fileName = media.name || media.mediaUrl || media.url || media.filename;
+                      const isImage = fileName && fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                      console.log('fileName:', fileName, 'isImage:', isImage);
+                      return isImage;
+                    })
                     .map((media, idx) => {
-                      const url = `${API_BASE_URL}/uploads/${selectedPackage.id}/${media.name}`;
-                      console.log('Imagem renderizada (viewMedia):', url);
+                      // Tenta diferentes propriedades para construir a URL
+                      const fileName = media.name || media.mediaUrl || media.url || media.filename;
+                      const cleanFileName = fileName.replace(/\\/g, '/').split('/').pop();
+                      const imageUrl = `${API_BASE_URL}/uploads/${selectedPackage.id}/${cleanFileName}`;
+                      console.log('Construindo URL da imagem:', imageUrl, 'para media:', media);
+                      
                       return (
-                        <img
-                          key={idx}
-                          src={url}
-                          alt={media.name}
+                        <ImageWithFallback
+                          key={`viewMedia-${idx}`}
+                          src={imageUrl}
+                          alt={cleanFileName}
                           className="w-32 h-20 object-cover rounded shadow"
                         />
                       );
-                    })}
+                    })
+                  }
+                  
+                  {/* Renderiza imagens de packageMedia se existir (fallback) */}
+                  {(!viewMedia || viewMedia.length === 0) && selectedPackage?.packageMedia?.length > 0 && selectedPackage.packageMedia
+                    .filter(media => {
+                      const fileName = media.mediaUrl || media.name || media;
+                      return fileName && fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                    })
+                    .map((media, idx) => {
+                      const fileName = media.mediaUrl || media.name || media;
+                      const cleanFileName = fileName.replace(/\\/g, '/').split('/').pop();
+                      const imageUrl = `${API_BASE_URL}/uploads/${selectedPackage.id}/${cleanFileName}`;
+                      console.log('Imagem packageMedia:', imageUrl);
+                      
+                      return (
+                        <ImageWithFallback
+                          key={`packageMedia-${idx}`}
+                          src={imageUrl}
+                          alt={cleanFileName}
+                          className="w-32 h-20 object-cover rounded shadow"
+                        />
+                      );
+                    })
+                  }
+                  
+                  {/* Mensagem se não houver imagens */}
+                  {(!viewMedia || viewMedia.length === 0) && (!selectedPackage?.packageMedia || selectedPackage.packageMedia.length === 0) && (
+                    <div className="text-gray-500 text-center">Nenhuma imagem disponível</div>
+                  )}
                 </div>
-              ) : null}
+              )}
               <div className="flex flex-col gap-2 text-base">
                 <span><b>ID:</b> {selectedPackage.id}</span>
                 <span><b>Nome:</b> {selectedPackage.name}</span>
