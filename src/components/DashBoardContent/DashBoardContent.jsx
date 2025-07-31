@@ -1,7 +1,6 @@
 import { useState } from "react";
 import BookingsContent from "./BookingsContent";
 import RatingsContent from "./RatingsContent";
-import api from "../../services/api";
 
 const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
 

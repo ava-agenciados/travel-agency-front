@@ -2,9 +2,8 @@
 import { useState } from "react";
 import BookingsContent from "./BookingsContent";
 import RatingsContent from "./RatingsContent";
-import api from "../../services/api";
 
-const API_BASE_URL = "http://localhost:5110"; // endereço real do backend para imagens e API
+const API_BASE_URL = "https://localhost:8080"; // endereço real do backend para imagens e API
 
 const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
 
@@ -32,6 +31,8 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
   const [currentPage, setCurrentPage] = useState(1);
   // Abrir modal de visualizar/editar
   const handleView = async (pkg) => {
+    console.log('Pacote selecionado:', pkg);
+    console.log('beginDate:', pkg.beginDate, 'endDate:', pkg.endDate);
     setSelectedPackage(pkg);
     setShowModal(true);
     setViewMediaLoading(true);
@@ -118,6 +119,74 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
 
+  // Função para converter data do formato ISO (yyyy-MM-dd) para formato brasileiro (dd/MM/yyyy)
+  const formatDateForAPI = (dateString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Função para converter data do formato brasileiro (dd/MM/yyyy) de volta para formato ISO (yyyy-MM-dd) para exibição
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    // Se já estiver no formato ISO (yyyy-MM-dd), retorna como está
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}/)) {
+      return dateString.slice(0, 10);
+    }
+    // Se estiver no formato brasileiro (dd/MM/yyyy), converte para ISO
+    if (dateString.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+      const [day, month, year] = dateString.split('/');
+      return `${year}-${month}-${day}`;
+    }
+    return '';
+  };
+
+  // Função para formatar data para exibição (dd/MM/yyyy)
+  const formatDateForView = (dateString) => {
+    if (!dateString || dateString === null || dateString === undefined) return '-';
+    
+    try {
+      // Se está no formato brasileiro (dd/MM/yyyy), retorna como está
+      if (typeof dateString === 'string' && dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        return dateString;
+      }
+      
+      // Se está no formato ISO (yyyy-MM-dd), converte para brasileiro
+      if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}/)) {
+        const [year, month, day] = dateString.split('-');
+        return `${day}/${month}/${year}`;
+      }
+      
+      // Se está no formato americano (MM/dd/yyyy), converte
+      if (typeof dateString === 'string' && dateString.match(/^\d{2}\/\d{2}\/\d{4}$/) && dateString.includes('/')) {
+        // Primeiro testa se é americano tentando parsear
+        const date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          return `${day}/${month}/${year}`;
+        }
+      }
+      
+      // Para qualquer outro formato, tenta converter usando Date
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+      
+      return '-';
+    } catch (error) {
+      return '-';
+    }
+  };
+
   // Funções auxiliares para o modal de criação
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
@@ -131,10 +200,10 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
       origin: createForm.origin,
       destination: createForm.destination,
       price: Number(createForm.price),
-      activeFrom: createForm.activeFrom || null,
-      activeUntil: createForm.activeUntil || null,
-      beginDate: createForm.beginDate || null,
-      endDate: createForm.endDate || null,
+      activeFrom: formatDateForAPI(createForm.activeFrom),
+      activeUntil: formatDateForAPI(createForm.activeUntil),
+      beginDate: formatDateForAPI(createForm.beginDate),
+      endDate: formatDateForAPI(createForm.endDate),
       quantity: Number(createForm.quantity),
       isAvailable: !!createForm.isAvailable,
       imageUrl: createForm.imageUrl,
@@ -444,10 +513,10 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                       price: Number(editForm.price),
                       origin: editForm.origin,
                       destination: editForm.destination,
-                      activeFrom: editForm.activeFrom || null,
-                      activeUntil: editForm.activeUntil || null,
-                      beginDate: editForm.beginDate || null,
-                      endDate: editForm.endDate || null,
+                      activeFrom: formatDateForAPI(editForm.activeFrom),
+                      activeUntil: formatDateForAPI(editForm.activeUntil),
+                      beginDate: formatDateForAPI(editForm.beginDate),
+                      endDate: formatDateForAPI(editForm.endDate),
                       quantity: Number(editForm.quantity),
                       isAvailable: !!editForm.isAvailable,
                       imageUrl: editForm.imageUrl,
@@ -530,19 +599,19 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                   </label>
                   <label className="flex flex-col gap-1">
                     Data de início (opcional)
-                    <input type="date" className="border rounded px-2 py-1" value={editForm.activeFrom ? editForm.activeFrom.slice(0,10) : ''} onChange={e => setEditForm(f => ({ ...f, activeFrom: e.target.value }))} />
+                    <input type="date" className="border rounded px-2 py-1" value={formatDateForDisplay(editForm.activeFrom)} onChange={e => setEditForm(f => ({ ...f, activeFrom: e.target.value }))} />
                   </label>
                   <label className="flex flex-col gap-1">
                     Data de término (opcional)
-                    <input type="date" className="border rounded px-2 py-1" value={editForm.activeUntil ? editForm.activeUntil.slice(0,10) : ''} onChange={e => setEditForm(f => ({ ...f, activeUntil: e.target.value }))} />
+                    <input type="date" className="border rounded px-2 py-1" value={formatDateForDisplay(editForm.activeUntil)} onChange={e => setEditForm(f => ({ ...f, activeUntil: e.target.value }))} />
                   </label>
                   <label className="flex flex-col gap-1">
                     Data de saída (opcional)
-                    <input type="date" className="border rounded px-2 py-1" value={editForm.beginDate ? editForm.beginDate.slice(0,10) : ''} onChange={e => setEditForm(f => ({ ...f, beginDate: e.target.value }))} />
+                    <input type="date" className="border rounded px-2 py-1" value={formatDateForDisplay(editForm.beginDate)} onChange={e => setEditForm(f => ({ ...f, beginDate: e.target.value }))} />
                   </label>
                   <label className="flex flex-col gap-1">
                     Data de retorno (opcional)
-                    <input type="date" className="border rounded px-2 py-1" value={editForm.endDate ? editForm.endDate.slice(0,10) : ''} onChange={e => setEditForm(f => ({ ...f, endDate: e.target.value }))} />
+                    <input type="date" className="border rounded px-2 py-1" value={formatDateForDisplay(editForm.endDate)} onChange={e => setEditForm(f => ({ ...f, endDate: e.target.value }))} />
                   </label>
                   <label className="flex flex-col gap-1">
                     Quantidade
@@ -784,9 +853,9 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                 <span><b>Destino:</b> {selectedPackage.destination}</span>
                 <span><b>Preço:</b> R$ {selectedPackage.price}</span>
                 <span><b>Desconto:</b> {selectedPackage.discountPercent ? selectedPackage.discountPercent + '%' : '-'}</span>
-                <span><b>Data de Saída:</b> {selectedPackage.departureDate ? new Date(selectedPackage.departureDate).toLocaleDateString() : '-'}</span>
-                <span><b>Data de Retorno:</b> {selectedPackage.returnDate ? new Date(selectedPackage.returnDate).toLocaleDateString() : '-'}</span>
-                <span><b>Ativo:</b> {selectedPackage.isActive ? 'Sim' : 'Não'}</span>
+                <span><b>Data de Saída:</b> {formatDateForView(selectedPackage.beginDate)}</span>
+                <span><b>Data de Retorno:</b> {formatDateForView(selectedPackage.endDate)}</span>
+                <span><b>Disponível:</b> {selectedPackage.isAvailable ? 'Sim' : 'Não'}</span>
               </div>
               {/* Hospedagem */}
               {selectedPackage.lodgingInfo && (
@@ -828,7 +897,7 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                         <div className="flex items-center gap-2">
                           <span className="font-bold">Nota:</span> <span>{rating.rating}</span>
                           <span className="ml-4 text-sm text-gray-500">{rating.userName}</span>
-                          <span className="ml-2 text-xs text-gray-400">{rating.createdAt ? new Date(rating.createdAt).toLocaleDateString() : ''}</span>
+                          <span className="ml-2 text-xs text-gray-400">{formatDateForView(rating.createdAt)}</span>
                         </div>
                         <div className="text-gray-700 mt-1">{rating.comment}</div>
                       </div>

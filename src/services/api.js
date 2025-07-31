@@ -1,3 +1,4 @@
+
 // INTEGRAÇÃO COM O BACKEND
 import axios from 'axios';
  
@@ -8,13 +9,12 @@ const api = axios.create({
         'Content-Type': 'application/json',
     }
 });
-
 // Interceptador para adicionar o token de autenticação ao header em todas as requisições
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('token');
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            config.headers.Authorization = `${token}`;
         }
         return config;
     },

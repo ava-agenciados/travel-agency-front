@@ -1,6 +1,5 @@
 
 import { useEffect, useState } from 'react';
-import api from '../../services/api';
 
 const DashBoardUsers = () => {
   const [users, setUsers] = useState([]);
