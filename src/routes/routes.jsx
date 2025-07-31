@@ -8,6 +8,8 @@ import ResetPassword from '../pages/ResetPassword/ResetPassword.jsx'
 import AdminDashboard from '../pages/Admin/AdminDashboard.jsx'
 import AttendantDashboard from '../pages/Attendant/AttendantDashboard.jsx'
 import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute.jsx'
+import PackageDetails from '../pages/PackageDetails/PackageDetails.jsx'
+import ResearchResults from '../pages/ResearchResults/ResearchResults.jsx'
 
 const Router = () => {
 
@@ -21,6 +23,8 @@ const Router = () => {
                     <Route path='/register' element={<Register/>} />
                     <Route path='/password-recovery' element={<PasswordRecovery/>} />
                     <Route path='/reset-password' element={<ResetPassword/>} />
+                    <Route path='/package-details' element={<PackageDetails/>} />
+                    <Route path='/research-results' element={<ResearchResults/>} />
                     
                     {/* Rotas Protegidas */}
                     <Route 

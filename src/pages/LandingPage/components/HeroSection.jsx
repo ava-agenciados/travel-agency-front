@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import LoadingOverlay from "../../../components/LoadingOverlay";
 import api from "../../../services/api";
 import CategoryScroll from "../components/CategoryScroll/CategoryScroll";
 import Images from "../../../assets/image";
@@ -14,6 +15,7 @@ const HeroSection = () => {
 
  const [origin, setOrigin] = useState("");
  const [destination, setDestination] = useState("");
+ const [loading, setLoading] = useState(false);
 
  function formatDateToInput(date) {
  return date.toISOString().split("T")[0];
@@ -52,11 +54,11 @@ const HeroSection = () => {
  }, []);
 
  const handleSearch = async () => {
- if (!origin || !destination || !startDate || !endDate) {
- alert("Preencha todos os campos.");
- return;
- }
-
+    if (!origin || !destination || !startDate || !endDate) {
+      alert("Preencha todos os campos.");
+      return;
+    }
+    setLoading(true);
     try {
       const departureFormated = new Date(startDate).toISOString();
       const returnFormated = new Date(endDate).toISOString();
@@ -69,20 +71,44 @@ const HeroSection = () => {
           returnDate: returnFormated,
         },
       });
+      const packages = Array.isArray(response.data) ? response.data : [];
+      const count = packages.length;
+      setResultados(packages);
+      navigate("/research-results", {
+        state: {
+          packages,
+          count,
+          origin,
+          destination,
+          startDate,
+          endDate,
+        },
+      });
       console.log("Resultados:", response.data);
-      setResultados(response.data)
-      navigate("/login", { state: { package: response.data } });
     } catch (error) {
       console.error("Erro ao buscar:", error);
-      // Redireciona mesmo em caso de erro
-      navigate("/login", { state: { package: null } });
+      navigate("/research-results", {
+        state: {
+          packages: [],
+          count: 0,
+          origin,
+          destination,
+          startDate,
+          endDate,
+        },
+      });
+    } finally {
+      // Simula atraso de 2 segundos antes de esconder o loading
+      await new Promise(resolve => setTimeout(resolve, 4000));
+      setLoading(false);
     }
   };
 
 
 return (
- <>
-<section className="relative bg-gray-100 pt-[320px] pb-10">
+  <>
+    {loading && <LoadingOverlay />}
+    <section className="relative bg-gray-100 pt-[320px] pb-10">
  <div
  className="absolute top-0 left-0 w-full h-[300px] bg-cover bg-center z-0"
  style={{ backgroundImage: `url(${Images.Bg_HeroSection})` }}
