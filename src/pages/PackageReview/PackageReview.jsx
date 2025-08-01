@@ -15,13 +15,23 @@ import api from '../../services/api';
 import authService from '../../services/authService';
 
 // retornar na tela
-
-
 const PackageReview = () => {
   const navigate = useNavigate();
   // Recebe dados via navegação
   const location = useLocation();
-  const { packageID, startTravel, endTravel } = location.state || {};
+  // Recupera dados do sessionStorage se não vierem da navegação
+  let { packageID, startTravel, endTravel } = location.state || {};
+  // Se não vieram via state, tenta recuperar do sessionStorage
+  if (!packageID) {
+    packageID = sessionStorage.getItem('packageID');
+    startTravel = sessionStorage.getItem('startTravel');
+    endTravel = sessionStorage.getItem('endTravel');
+  } else {
+    // Salva no sessionStorage ao navegar normalmente
+    sessionStorage.setItem('packageID', packageID);
+    if (startTravel) sessionStorage.setItem('startTravel', startTravel);
+    if (endTravel) sessionStorage.setItem('endTravel', endTravel);
+  }
 
   // Estado para dados do pacote
   const [packageData, setPackageData] = useState(null);
@@ -44,7 +54,7 @@ const PackageReview = () => {
         .catch(() => setPackageData(null));
     }
   }, [packageID]);
-
+  console.log(packageData);
   // Preencher responsável com dados do usuário logado
   useEffect(() => {
     const user = authService.getUserInfo();
@@ -96,6 +106,10 @@ const PackageReview = () => {
 
   // Função para navegar para a tela de pagamento, passando todos os dados necessários
   const handleConfirmPayment = () => {
+    // Salva dados no sessionStorage para garantir persistência
+    sessionStorage.setItem('packageID', packageID);
+    if (startTravel) sessionStorage.setItem('startTravel', startTravel);
+    if (endTravel) sessionStorage.setItem('endTravel', endTravel);
     navigate('/payment', {
       state: {
         packageData,
@@ -105,7 +119,7 @@ const PackageReview = () => {
         companions,
       },
     });
-  };
+  } 
 
   return (
     <MainLayout>
