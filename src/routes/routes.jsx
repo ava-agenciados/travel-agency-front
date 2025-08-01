@@ -13,6 +13,7 @@ import UserProfile from '../pages/UserProfile/UserProfile.jsx'
 import Layout from '../components/UserProfile/Layout.jsx'
 import MyBookings from '../pages/UserProfile/MyBookings.jsx'
 import PackageReview from '../pages/PackageReview/PackageReview.jsx'
+import PackageDetails from '../pages/PackageDetails/PackageDetails.jsx'
 
 const Router = () => {
 
@@ -26,6 +27,7 @@ const Router = () => {
                     <Route path='/register' element={<Register/>} />
                     <Route path='/password-recovery' element={<PasswordRecovery/>} />
                     <Route path='/reset-password' element={<ResetPassword/>} />
+                    <Route path='/package-details/:id' element={<PackageDetails/>} />
                     <Route path='/payment' element={<Payment/>} />
                     <Route path='/package-review' element={<PackageReview/>} />
 

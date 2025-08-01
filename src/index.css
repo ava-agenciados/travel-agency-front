@@ -1,17 +1,25 @@
 /* Cores personalizadas do projeto */
 :root {
-  --primary-color: #122137;
-  --secund-color: #31425A;
-  --third-color: #1877F2;
+    --primary-color: #122137;
+    --secund-color: #31425A;
+    --third-color: #1877F2;
 }
 
 /* Classe personalizada para max-width */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     scroll-behavior: smooth;
     font-family: 'Inter', sans-serif;
+}
+
+.oswald-uniquifier {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: #5d6f88;
 }
 
 .max-w-9xl {
