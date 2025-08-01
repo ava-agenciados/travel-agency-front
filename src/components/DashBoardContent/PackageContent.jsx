@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import BookingsContent from "./BookingsContent";
 import RatingsContent from "./RatingsContent";
+import authService from "../../services/authService";
 
 const API_BASE_URL = "https://localhost:8080"; // endereço real do backend para imagens e API
 
@@ -231,27 +232,15 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
     if (!dateString || dateString === null || dateString === undefined) return '-';
     
     try {
-      // Se está no formato brasileiro (dd/MM/yyyy), retorna como está
+      // Se já está no formato brasileiro (dd/MM/yyyy), retorna como está
       if (typeof dateString === 'string' && dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
         return dateString;
       }
       
       // Se está no formato ISO (yyyy-MM-dd), converte para brasileiro
       if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}/)) {
-        const [year, month, day] = dateString.split('-');
+        const [year, month, day] = dateString.split('T')[0].split('-');
         return `${day}/${month}/${year}`;
-      }
-      
-      // Se está no formato americano (MM/dd/yyyy), converte
-      if (typeof dateString === 'string' && dateString.match(/^\d{2}\/\d{2}\/\d{4}$/) && dateString.includes('/')) {
-        // Primeiro testa se é americano tentando parsear
-        const date = new Date(dateString);
-        if (!isNaN(date.getTime())) {
-          const day = String(date.getDate()).padStart(2, '0');
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const year = date.getFullYear();
-          return `${day}/${month}/${year}`;
-        }
       }
       
       // Para qualquer outro formato, tenta converter usando Date
@@ -487,10 +476,16 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
   if (title === 'Pacotes') {
     return (
       <>
-        <div className="w-full max-w-7xl flex-1 mx-auto rounded-lg bg-white p-10 flex flex-col justify-start shadow-xl mt-16 overflow-auto" style={{ minHeight: '400px', maxHeight: 'calc(100vh - 6rem)' }}>
-          <h2 className="text-3xl font-bold mb-6 mt-6 text-center">Pacotes</h2>
-          <div className="flex justify-end mb-4 gap-2">
-            <button onClick={() => setShowCreateModal(true)} className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 text-base font-semibold shadow">Novo Pacote</button>
+        <div className="w-full max-w-7xl flex-1 mx-auto rounded-lg bg-white p-2 md:p-10 flex flex-col justify-start shadow-xl mt-4 md:mt-16 overflow-auto" style={{ minHeight: '400px', maxHeight: 'calc(100vh - 6rem)' }}>
+          {/* Header com título e botão */}
+          <div className="flex flex-row items-center justify-between mb-4 md:mb-6 mt-4 md:mt-6">
+            <h2 className="text-xl md:text-3xl font-bold">Pacotes</h2>
+            {(authService.getUserRole() === 'Admin' || authService.getUserRole() === 'Administrador') && (
+              <button onClick={() => setShowCreateModal(true)} className="px-2 md:px-4 py-1 md:py-2 rounded bg-blue-500 text-white hover:bg-blue-600 text-xs md:text-base font-semibold shadow">
+                <span className="hidden sm:inline">Novo Pacote</span>
+                <span className="sm:hidden">+</span>
+              </button>
+            )}
           </div>
           {packages.length === 0 ? (
             <p className="text-gray-500 text-center">Nenhum pacote encontrado.</p>
@@ -500,26 +495,26 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">ID</th>
-                      <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">Nome</th>
-                      <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">Descrição</th>
-                      <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">Preço</th>
-                      <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">Ações</th>
+                      <th className="px-2 md:px-4 py-2 text-center text-xs md:text-sm font-semibold text-gray-700 hidden md:table-cell">ID</th>
+                      <th className="px-2 md:px-4 py-2 text-center text-xs md:text-sm font-semibold text-gray-700">Nome</th>
+                      <th className="px-2 md:px-4 py-2 text-center text-xs md:text-sm font-semibold text-gray-700 hidden md:table-cell">Descrição</th>
+                      <th className="px-2 md:px-4 py-2 text-center text-xs md:text-sm font-semibold text-gray-700">Preço</th>
+                      <th className="px-2 md:px-4 py-2 text-center text-xs md:text-sm font-semibold text-gray-700">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-100">
                     {paginatedPackages.map((pkg, idx) => (
                       <tr key={pkg.id || idx} className="hover:bg-blue-50">
-                        <td className="px-4 py-2 whitespace-nowrap text-center font-medium">{pkg.id}</td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center">{pkg.name || 'Sem nome'}</td>
-                        <td className="px-4 py-2 max-w-xs truncate text-center" title={pkg.description || '-'}>
+                        <td className="px-2 md:px-4 py-2 whitespace-nowrap text-center font-medium text-xs md:text-sm hidden md:table-cell">{pkg.id}</td>
+                        <td className="px-2 md:px-4 py-2 whitespace-nowrap text-center text-xs md:text-sm">{pkg.name || 'Sem nome'}</td>
+                        <td className="px-2 md:px-4 py-2 max-w-xs truncate text-center text-xs md:text-sm hidden md:table-cell" title={pkg.description || '-'}>
                           {pkg.description && pkg.description.length > 60 ? pkg.description.slice(0, 60) + '...' : (pkg.description || '-')}
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center">R$ {pkg.price != null ? pkg.price : '-'}</td>
-                        <td className="px-4 py-2 whitespace-nowrap flex gap-2 justify-center">
+                        <td className="px-2 md:px-4 py-2 whitespace-nowrap text-center text-xs md:text-sm">R$ {pkg.price != null ? pkg.price : '-'}</td>
+                        <td className="px-2 md:px-4 py-2 whitespace-nowrap flex gap-1 md:gap-2 justify-center">
                           {/* Botão de visualizar */}
-                          <button onClick={() => handleView(pkg)} className="p-2 rounded hover:bg-blue-100 text-blue-600" title="Visualizar">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                          <button onClick={() => handleView(pkg)} className="p-1 md:p-2 rounded hover:bg-blue-100 text-blue-600" title="Visualizar">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
@@ -527,17 +522,19 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                           {/* Botão de editar */}
                           <button onClick={() => {
                             handleOpenEdit(pkg);
-                          }} className="p-2 rounded hover:bg-yellow-100 text-yellow-600" title="Editar">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                          }} className="p-1 md:p-2 rounded hover:bg-yellow-100 text-yellow-600" title="Editar">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487a2.1 2.1 0 0 1 2.97 2.97L8.978 18.312a4.2 4.2 0 0 1-1.768 1.05l-3.15.9a.6.6 0 0 1-.74-.74l.9-3.15a4.2 4.2 0 0 1 1.05-1.768L16.862 4.487Z" />
                             </svg>
                           </button>
-                          {/* Botão de excluir */}
-                          <button onClick={() => handleDelete(pkg)} className="p-2 rounded hover:bg-red-100 text-red-600" title="Excluir">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                            </svg>
-                          </button>
+                          {/* Botão de excluir - Apenas para Administradores */}
+                          {(authService.getUserRole() === 'Admin' || authService.getUserRole() === 'Administrador') && (
+                            <button onClick={() => handleDelete(pkg)} className="p-1 md:p-2 rounded hover:bg-red-100 text-red-600" title="Excluir">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                              </svg>
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -547,15 +544,15 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
               {/* Paginação */}
               <div className="flex justify-center items-center gap-2 mt-4">
                 <button
-                  className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                  className="px-2 md:px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-xs md:text-sm"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                 >
                   Anterior
                 </button>
-                <span className="mx-2 text-sm">Página {currentPage} de {totalPages}</span>
+                <span className="mx-2 text-xs md:text-sm">Página {currentPage} de {totalPages}</span>
                 <button
-                  className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                  className="px-2 md:px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-xs md:text-sm"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                 >
@@ -567,10 +564,10 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
         </div>
         {/* Modal de edição de pacote (estrutura base, implementação dos campos e mídias virá em seguida) */}
         {showEditModal && editForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-            <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-8 relative animate-fadeIn flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
+            <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-4 md:p-8 relative animate-fadeIn flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
               <button onClick={() => setShowEditModal(false)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button>
-              <h3 className="text-2xl font-semibold mb-4">Editar Pacote</h3>
+              <h3 className="text-xl md:text-2xl font-semibold mb-4">Editar Pacote</h3>
               {/* Fotos do pacote no topo */}
               {editMedia.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-center mb-2">
@@ -866,10 +863,10 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
         )}
         {/* Modal de visualização de pacote */}
         {showModal && selectedPackage && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-            <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-8 relative animate-fadeIn flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
+            <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-4 md:p-8 relative animate-fadeIn flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
               <button onClick={closeModal} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button>
-              <h3 className="text-2xl font-semibold mb-4">Detalhes do Pacote</h3>
+              <h3 className="text-xl md:text-2xl font-semibold mb-4">Detalhes do Pacote</h3>
               {/* Fotos do pacote */}
               {viewMediaLoading ? (
                 <div className="text-blue-500">Carregando fotos...</div>
@@ -941,9 +938,94 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                 <span><b>Origem:</b> {selectedPackage.origin}</span>
                 <span><b>Destino:</b> {selectedPackage.destination}</span>
                 <span><b>Preço:</b> R$ {selectedPackage.price}</span>
-                <span><b>Desconto:</b> {selectedPackage.discountPercent ? selectedPackage.discountPercent + '%' : '-'}</span>
-                <span><b>Data de Saída:</b> {formatDateForView(selectedPackage.beginDate)}</span>
-                <span><b>Data de Retorno:</b> {formatDateForView(selectedPackage.endDate)}</span>
+                <span><b>Desconto:</b> {
+                  (() => {
+                    // Verifica se há desconto válido
+                    const discount = selectedPackage.discountPercent || selectedPackage.discount;
+                    if (discount !== null && discount !== undefined && discount > 0) {
+                      return discount + '%';
+                    }
+                    return 'Sem desconto';
+                  })()
+                }</span>
+                <span><b>Data de Saída:</b> {
+                  (() => {
+                    // Debug: vamos ver todos os campos disponíveis do pacote
+                    console.log('DEBUG - Todos os campos do pacote:', Object.keys(selectedPackage));
+                    console.log('DEBUG - Campos de data específicos:', {
+                      beginDate: selectedPackage.beginDate,
+                      endDate: selectedPackage.endDate,
+                      departureDate: selectedPackage.departureDate,
+                      returnDate: selectedPackage.returnDate,
+                      startDate: selectedPackage.startDate,
+                      finishDate: selectedPackage.finishDate,
+                      departure_date: selectedPackage.departure_date,
+                      return_date: selectedPackage.return_date,
+                      start_date: selectedPackage.start_date,
+                      finish_date: selectedPackage.finish_date,
+                      begin_date: selectedPackage.begin_date,
+                      end_date: selectedPackage.end_date,
+                      createdAt: selectedPackage.createdAt,
+                      updatedAt: selectedPackage.updatedAt
+                    });
+                    
+                    // Tenta vários campos possíveis para data de saída
+                    const possibleDateFields = [
+                      selectedPackage.beginDate,
+                      selectedPackage.departureDate,
+                      selectedPackage.startDate,
+                      selectedPackage.departure_date,
+                      selectedPackage.start_date,
+                      selectedPackage.begin_date
+                    ];
+                    
+                    for (const dateField of possibleDateFields) {
+                      if (dateField) {
+                        console.log('DEBUG - Campo de data encontrado para saída:', dateField);
+                        // Se já está no formato brasileiro (dd/MM/yyyy), retorna como está
+                        if (typeof dateField === 'string' && dateField.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                          return dateField;
+                        }
+                        
+                        // Usa a função formatDateForView para outros formatos
+                        const formattedDate = formatDateForView(dateField);
+                        if (formattedDate !== '-') {
+                          return formattedDate;
+                        }
+                      }
+                    }
+                    return '-';
+                  })()
+                }</span>
+                <span><b>Data de Retorno:</b> {
+                  (() => {
+                    // Tenta vários campos possíveis para data de retorno
+                    const possibleDateFields = [
+                      selectedPackage.endDate,
+                      selectedPackage.returnDate,
+                      selectedPackage.finishDate,
+                      selectedPackage.return_date,
+                      selectedPackage.finish_date,
+                      selectedPackage.end_date
+                    ];
+                    
+                    for (const dateField of possibleDateFields) {
+                      if (dateField) {
+                        // Se já está no formato brasileiro (dd/MM/yyyy), retorna como está
+                        if (typeof dateField === 'string' && dateField.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                          return dateField;
+                        }
+                        
+                        // Usa a função formatDateForView para outros formatos
+                        const formattedDate = formatDateForView(dateField);
+                        if (formattedDate !== '-') {
+                          return formattedDate;
+                        }
+                      }
+                    }
+                    return '-';
+                  })()
+                }</span>
                 <span><b>Disponível:</b> {selectedPackage.isAvailable ? 'Sim' : 'Não'}</span>
               </div>
               {/* Hospedagem */}
@@ -1001,10 +1083,10 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
         )}
         {/* Modal de criação de pacote */}
         {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-            <div className="bg-white rounded-lg shadow-2xl max-w-lg w-full p-8 relative animate-fadeIn flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
+            <div className="bg-white rounded-lg shadow-2xl max-w-lg w-full p-4 md:p-8 relative animate-fadeIn flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
               <button onClick={() => setShowCreateModal(false)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button>
-              <h3 className="text-2xl font-semibold mb-4">Criar Novo Pacote</h3>
+              <h3 className="text-xl md:text-2xl font-semibold mb-4">Criar Novo Pacote</h3>
               <form onSubmit={handleCreateSubmit} className="flex flex-col gap-3">
                 <label className="flex flex-col gap-1">
                   Nome

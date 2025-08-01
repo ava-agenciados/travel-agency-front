@@ -105,13 +105,19 @@ const AdminDashboard = () => {
     };
 
     return (
-      <div className="flex flex-col md:flex-row h-screen w-full overflow-x-hidden">
-        <div className="w-full md:w-80 flex-shrink-0">
-          <DashBoardSideBar onMenuSelect={setSelectedMenu} selectedMenu={selectedMenu} />
-        </div>
-        <div className="flex-1 flex flex-col min-h-0">
-          <DashBoardNavBar onSearch={handleSearch} onLogout={handleLogout} />
-          <div className="flex-1 flex justify-center items-center px-2 md:px-0 py-2 md:py-0 w-full overflow-auto">
+      <div className="flex h-screen w-full overflow-hidden">
+        {/* Sidebar */}
+        <DashBoardSideBar onMenuSelect={setSelectedMenu} selectedMenu={selectedMenu} onLogout={handleLogout} />
+        
+        {/* Main content */}
+        <div className="flex-1 flex flex-col md:ml-0">
+          {/* Navbar */}
+          <div className="mt-16 md:mt-0">
+            <DashBoardNavBar onSearch={handleSearch} onLogout={handleLogout} />
+          </div>
+          
+          {/* Content area */}
+          <div className="flex-1 flex justify-center items-center px-2 md:px-4 py-2 md:py-4 w-full overflow-auto">
             {selectedMenu === 'Pacotes' ? (
               <PackageContent title={selectedMenu} packages={packages} onPackageUpdate={handlePackageUpdate} />
             ) : selectedMenu === 'Reservas' ? (
@@ -129,4 +135,4 @@ const AdminDashboard = () => {
     )
 }
 
-export default AdminDashboard
+export default AdminDashboard;

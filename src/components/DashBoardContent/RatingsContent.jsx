@@ -1,6 +1,7 @@
 
 
 import { useEffect, useState } from "react";
+import authService from "../../services/authService";
 
 const RatingsContent = () => {
   const [packages, setPackages] = useState([]);
@@ -79,12 +80,12 @@ const RatingsContent = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Pacote</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Origem</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Destino</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Comentários</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Média</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Ações</th>
+                <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm font-semibold text-gray-700">Pacote</th>
+                <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm font-semibold text-gray-700 hidden md:table-cell">Origem</th>
+                <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm font-semibold text-gray-700 hidden md:table-cell">Destino</th>
+                <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm font-semibold text-gray-700">Coment.</th>
+                <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm font-semibold text-gray-700">Média</th>
+                <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm font-semibold text-gray-700">Ações</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
@@ -92,18 +93,18 @@ const RatingsContent = () => {
                 .slice((pkgPage - 1) * PACKAGES_PER_PAGE, pkgPage * PACKAGES_PER_PAGE)
                 .map((pkg, idx) => (
                   <tr key={pkg.id || pkg.packageId || idx} className="hover:bg-blue-50">
-                    <td className="px-4 py-2 whitespace-nowrap font-bold">{pkg.nome || pkg.name || 'Sem nome'}</td>
-                    <td className="px-4 py-2 whitespace-nowrap">{pkg.origin}</td>
-                    <td className="px-4 py-2 whitespace-nowrap">{pkg.destination}</td>
-                    <td className="px-4 py-2 whitespace-nowrap">{pkg.ratings ? pkg.ratings.length : 0}</td>
-                    <td className="px-4 py-2 whitespace-nowrap">{getAverage(pkg.ratings)}</td>
-                    <td className="px-4 py-2 whitespace-nowrap">
-                      <button onClick={() => handleView(pkg)} className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 text-sm flex items-center gap-2" title="Visualizar comentários">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <td className="px-2 md:px-4 py-2 whitespace-nowrap font-bold text-xs md:text-sm">{pkg.nome || pkg.name || 'Sem nome'}</td>
+                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-xs md:text-sm hidden md:table-cell">{pkg.origin}</td>
+                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-xs md:text-sm hidden md:table-cell">{pkg.destination}</td>
+                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-xs md:text-sm">{pkg.ratings ? pkg.ratings.length : 0}</td>
+                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-xs md:text-sm">{getAverage(pkg.ratings)}</td>
+                    <td className="px-2 md:px-4 py-2 whitespace-nowrap">
+                      <button onClick={() => handleView(pkg)} className="px-2 md:px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 text-xs md:text-sm flex items-center gap-1 md:gap-2" title="Visualizar comentários">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 md:w-5 md:h-5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                         </svg>
-                        Visualizar
+                        <span className="hidden md:inline">Visualizar</span>
                       </button>
                     </td>
                   </tr>
@@ -132,20 +133,19 @@ const RatingsContent = () => {
       )}
       {/* Modal de comentários do pacote com paginação */}
       {showModal && selectedPackage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full p-10 relative animate-fadeIn flex flex-col gap-4 max-h-[90vh] overflow-y-auto min-w-[700px]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full p-4 md:p-8 relative animate-fadeIn flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
             <button onClick={() => setShowModal(false)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button>
-            <h3 className="text-2xl font-bold mb-2">{selectedPackage.nome || selectedPackage.name}</h3>
-            <div className="mb-2 text-gray-600">{selectedPackage.descricao || selectedPackage.description}</div>
+            <h3 className="text-xl md:text-2xl font-bold mb-2">{selectedPackage.nome || selectedPackage.name}</h3>
+            <div className="mb-2 text-gray-600 text-sm md:text-base">{selectedPackage.descricao || selectedPackage.description}</div>
             {selectedPackage.ratings && selectedPackage.ratings.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Usuário</th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Comentário</th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Nota</th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Ações</th>
+                      <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm font-semibold text-gray-700">Comentário</th>
+                      <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm font-semibold text-gray-700">Nota</th>
+                      <th className="px-2 md:px-4 py-2 text-left text-xs md:text-sm font-semibold text-gray-700">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-100">
@@ -153,19 +153,21 @@ const RatingsContent = () => {
                       .slice((currentPage - 1) * COMMENTS_PER_PAGE, currentPage * COMMENTS_PER_PAGE)
                       .map((rating, rIdx) => (
                         <tr key={rating.id || rIdx} className="hover:bg-blue-50">
-                          <td className="px-4 py-2 whitespace-nowrap">{rating.user?.name || rating.userName || rating.user?.email || rating.userEmail || '-'}</td>
-                          <td className="px-4 py-2 whitespace-nowrap max-w-xs truncate">{rating.comment}</td>
-                          <td className="px-4 py-2 whitespace-nowrap text-yellow-500 font-bold">{rating.rating}★</td>
-                          <td className="px-4 py-2 whitespace-nowrap flex gap-2">
-                            <button onClick={() => handleDelete(rating.id, selectedPackage.id || selectedPackage.packageId)} className="p-2 rounded hover:bg-red-100 text-red-600" title="Excluir" disabled={deletingId === rating.id}>
-                              {deletingId === rating.id ? (
-                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
-                              ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              )}
-                            </button>
+                          <td className="px-2 md:px-4 py-2 text-xs md:text-sm max-w-xs">{rating.comment}</td>
+                          <td className="px-2 md:px-4 py-2 whitespace-nowrap text-yellow-500 font-bold text-xs md:text-sm">{rating.rating}★</td>
+                          <td className="px-2 md:px-4 py-2 whitespace-nowrap flex gap-1 md:gap-2">
+                            {/* Botão de excluir - Apenas para Administradores */}
+                            {(authService.getUserRole() === 'Admin' || authService.getUserRole() === 'Administrador') && (
+                              <button onClick={() => handleDelete(rating.id, selectedPackage.id || selectedPackage.packageId)} className="p-1 md:p-2 rounded hover:bg-red-100 text-red-600" title="Excluir" disabled={deletingId === rating.id}>
+                                {deletingId === rating.id ? (
+                                  <svg className="w-3 h-3 md:w-4 md:h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                                ) : (
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 md:w-5 md:h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                )}
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -174,15 +176,15 @@ const RatingsContent = () => {
                 {/* Paginação */}
                 <div className="flex justify-center items-center gap-2 mt-4">
                   <button
-                    className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                    className="px-2 md:px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-xs md:text-sm"
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                   >
                     Anterior
                   </button>
-                  <span className="mx-2 text-sm">Página {currentPage} de {Math.ceil(selectedPackage.ratings.length / COMMENTS_PER_PAGE)}</span>
+                  <span className="mx-2 text-xs md:text-sm">Página {currentPage} de {Math.ceil(selectedPackage.ratings.length / COMMENTS_PER_PAGE)}</span>
                   <button
-                    className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                    className="px-2 md:px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-xs md:text-sm"
                     onClick={() => setCurrentPage((p) => Math.min(Math.ceil(selectedPackage.ratings.length / COMMENTS_PER_PAGE), p + 1))}
                     disabled={currentPage === Math.ceil(selectedPackage.ratings.length / COMMENTS_PER_PAGE)}
                   >
@@ -191,7 +193,7 @@ const RatingsContent = () => {
                 </div>
               </div>
             ) : (
-              <div className="text-gray-400 italic">Nenhuma avaliação para este pacote.</div>
+              <div className="text-gray-400 italic text-sm md:text-base">Nenhuma avaliação para este pacote.</div>
             )}
           </div>
         </div>
