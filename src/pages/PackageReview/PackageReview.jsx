@@ -9,15 +9,23 @@ import FormContainer from './components/FormContainer.jsx';
 import MainLayout from './components/MainLayout.jsx';
 import MobileOnly from './components/MobileOnly.jsx';
 import DesktopOnly from './components/DesktopOnly.jsx';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import api from '../../services/api';
+import authService from '../../services/authService';
 
 // retornar na tela
 
 
 const PackageReview = () => {
   const navigate = useNavigate();
-  // Mock dos dados iniciais
+  // Recebe dados via navegação
+  const location = useLocation();
+  const { packageID, startTravel, endTravel } = location.state || {};
+
+  // Estado para dados do pacote
+  const [packageData, setPackageData] = useState(null);
+  // Estado para responsável
   const [responsible, setResponsible] = useState({
     firstName: '',
     lastName: '',
@@ -28,10 +36,29 @@ const PackageReview = () => {
   const [companions, setCompanions] = useState([]);
   const [removingIndexes, setRemovingIndexes] = useState([]);
 
-  // Mock dos dados do pacote (serão recebidos de outra página)
-  const packageID = 1;
-  const startTravel = '2025-07-31T21:40:26.107Z';
-  const endTravel = '2025-08-05T21:40:26.107Z';
+  // Buscar dados do pacote ao montar
+  useEffect(() => {
+    if (packageID) {
+      api.get(`/api/v1/packages/${packageID}`)
+        .then(res => setPackageData(res.data))
+        .catch(() => setPackageData(null));
+    }
+  }, [packageID]);
+
+  // Preencher responsável com dados do usuário logado
+  useEffect(() => {
+    const user = authService.getUserInfo();
+    if (user) {
+      setResponsible(prev => ({
+        ...prev,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        cpfPassport: user.cpf || '',
+        phoneNumber: user.phoneNumber || '',
+        // isForeigner pode ser ajustado conforme o backend
+      }));
+    }
+  }, []);
 
   // Adiciona um novo acompanhante
   const handleAddCompanion = () => {
@@ -67,9 +94,17 @@ const PackageReview = () => {
     // e chamar a API
   };
 
-  // Função para navegar para a tela de pagamento
+  // Função para navegar para a tela de pagamento, passando todos os dados necessários
   const handleConfirmPayment = () => {
-    navigate('/payment');
+    navigate('/payment', {
+      state: {
+        packageData,
+        startTravel,
+        endTravel,
+        responsible,
+        companions,
+      },
+    });
   };
 
   return (
@@ -78,7 +113,11 @@ const PackageReview = () => {
         <PaymentSteps currentStep={2} />
         <FormContainer onSubmit={handleSubmit}>
           <MobileOnly className="order-1">
-            <PackageDetails />
+            <PackageDetails
+              packageData={packageData}
+              startTravel={startTravel}
+              endTravel={endTravel}
+            />
           </MobileOnly>
           <ReviewForm
             responsible={responsible}
@@ -90,10 +129,15 @@ const PackageReview = () => {
             handleCompanionChange={handleCompanionChange}
           />
           <MobileOnly className="order-3">
-            <ConfirmPayment onConfirm={handleConfirmPayment} />
+            <ConfirmPayment onConfirm={handleConfirmPayment} price={packageData?.price} />
           </MobileOnly>
           <DesktopOnly className="flex-col gap-6 w-full lg:w-[350px] order-3">
-            <SidebarDetails onConfirm={handleConfirmPayment} />
+            <SidebarDetails
+              onConfirm={handleConfirmPayment}
+              packageData={packageData}
+              startTravel={startTravel}
+              endTravel={endTravel}
+            />
           </DesktopOnly>
         </FormContainer>
       </main>

@@ -1,6 +1,6 @@
 // components/ImageGallery.jsx
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import NavBar from '../../components/Navbar/NavBar';
 import Footer from '../../components/Footer/Footer';
@@ -48,29 +48,26 @@ export default function PackageDetails() {
   console.log('Start Travel:', startTravel);
   console.log('End Travel:', endTravel);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Função para reservar
-  const handleReserve = async () => {
+  // Função para reservar (redireciona para /package-review com dados)
+  const navigate = useNavigate();
+  const handleReserve = () => {
     if (!startTravel || !endTravel) {
       alert('Não há datas de viagem disponíveis para este pacote.');
       return;
     }
     setIsSubmitting(true);
-    try {
-      const payload = {
+    // Envia os dados via estado de navegação
+    navigate('/package-review', {
+      state: {
         packageID: id,
         startTravel,
         endTravel,
-      };
-      await api.post('/api/v1/package-review', payload);
-      console.log('Reservando...', payload);
-    } catch (error) {
-      alert('Erro ao realizar reserva.');
-    } finally {
-      setIsSubmitting(false);
-    }
+      }
+    });
+    setIsSubmitting(false);
   };
 
-  const BASE_URL = "http://localhost:5110/";
+  const BASE_URL = "https://localhost:8080/";
 
   useEffect(() => {
     async function fetchPackage() {

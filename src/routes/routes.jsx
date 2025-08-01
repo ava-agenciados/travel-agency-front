@@ -14,6 +14,7 @@ import Layout from '../components/UserProfile/Layout.jsx'
 import MyBookings from '../pages/UserProfile/MyBookings.jsx'
 import PackageReview from '../pages/PackageReview/PackageReview.jsx'
 import PackageDetails from '../pages/PackageDetails/PackageDetails.jsx'
+import ResearchResults from '../pages/ResearchResults/ResearchResults.jsx'
 
 const Router = () => {
 
@@ -30,6 +31,7 @@ const Router = () => {
                     <Route path='/package-details/:id' element={<PackageDetails/>} />
                     <Route path='/payment' element={<Payment/>} />
                     <Route path='/package-review' element={<PackageReview/>} />
+                    <Route path='/research-results' element={<ResearchResults/>} />
 
                     {/*rota pai*/}
                      <Route 

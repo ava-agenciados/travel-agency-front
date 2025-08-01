@@ -10,9 +10,12 @@ import { forwardRef, useImperativeHandle } from 'react';
 import QrCodeModal from './Modals/QrCodeModal';
 import ConfirmModal from './Modals/ConfirmModal';
 import { useAuth } from '../../hooks/useAuth';
+import api from '../../services/api';
 import PendingModal from './Modals/PendingModal';
 
 const PaymentMethods = forwardRef((props, ref) => {
+  // Recebe dados do pacote, responsável, acompanhantes, datas via props
+  const { packageData, startTravel, endTravel, responsible, companions } = props;
   const [paymentMethod, setPaymentMethod] = useState('credit');
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
@@ -60,56 +63,73 @@ const PaymentMethods = forwardRef((props, ref) => {
     return true;
   };
   // Handler do botão de confirmação
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+    // Mapear método de pagamento para o backend
+    let paymentMethodValue = 0;
+    if (paymentMethod === 'pix') paymentMethodValue = 1;
+    else if (paymentMethod === 'boleto') paymentMethodValue = 2;
+    else if (paymentMethod === 'credit') paymentMethodValue = 3;
+
+    // Montar paymentMethods
+    let paymentMethodObj = {
+      paymentMethod: paymentMethodValue,
+      paymentDate: new Date().toISOString(),
+      transactionId: '',
+    };
     if (paymentMethod === 'credit') {
       if (!isValid(fields)) {
         setShowErrorModal(true);
         return;
       }
-      setShowLoading(true);
-      setTimeout(() => {
-        setShowLoading(false);
-        setShowRefusedModal(true);
-        setTimeout(() => {
-          setShowRefusedModal(false);
-          navigate('/payment');
-        }, 8000);
-      }, 8000);
-    } else if (paymentMethod === 'pix') {
-      if (!isAuthenticated) {
-        setShowAuthModal(true);
-        return;
-      }
-      // Fluxo Pix: QrCode -> Loading -> Confirm -> notfound
-      setShowQrCodeModal(true);
-      setTimeout(() => {
-        setShowQrCodeModal(false);
-        setShowLoading(true);
-        setTimeout(() => {
-          setShowLoading(false);
-          setShowPixConfirmModal(true);
-          setTimeout(() => {
-            setShowPixConfirmModal(false);
-            navigate('/mybookings');
-          }, 8000);
-        }, 8000);
-      }, 8000);
-    } else if (paymentMethod === 'boleto') {
-      if (!isAuthenticated) {
-        setShowAuthModal(true);
-        return;
-      }
-      setShowLoading(true);
-      setTimeout(() => {
-        setShowLoading(false);
-        setShowPendingModal(true);
-        setTimeout(() => {
-          setShowPendingModal(false);
-          navigate('/mybookings');
-        }, 8000);
-      }, 8000);
+      paymentMethodObj = {
+        ...paymentMethodObj,
+        firstName: responsible?.firstName || '',
+        lastName: responsible?.lastName || '',
+        cardNumber: fields.cardNumber,
+        cardHolderName: fields.cardName,
+        expirationDate: fields.expiry,
+        cvv: fields.cvv,
+        installments: 1, // pode ser ajustado
+        isCreditCard: true,
+        cpfPassport: responsible?.cpfPassport || '',
+        phoneNumber: responsible?.phoneNumber || '',
+      };
     }
-    // Adicione lógica para outros métodos se necessário
+
+    // Montar payload
+    const payload = {
+      packageID: packageData?.id,
+      startTravel,
+      endTravel,
+      companions: companions.map(c => ({
+        firstName: c.firstName,
+        lastName: c.lastName,
+        cpfPassport: c.cpfPassport,
+        isForeigner: c.isForeigner,
+        phoneNumber: c.phoneNumber,
+      })),
+      paymentMethods: [paymentMethodObj],
+      hasTravelInsurance: false, // pode ser ajustado
+      hasTourGuide: false,
+      hasTour: false,
+      hasActivities: false,
+    };
+
+    setShowLoading(true);
+    try {
+      await api.put('/api/v1/bookings/payment', payload);
+      setShowLoading(false);
+      // Sucesso: redireciona para bookings ou página de sucesso
+      navigate('/mybookings');
+    } catch (e) {
+      setShowLoading(false);
+      setShowErrorModal(true);
+      setErrorMessage('Erro ao processar pagamento.');
+    }
   };
   // Handlers de login/cadastro (exemplo, ajuste conforme necessário)
   const handleLogin = () => setShowAuthModal(false);
