@@ -9,7 +9,7 @@ const QrCodeModal = ({ onClose, qrCodeUrl = Images.IconQrCode, code = 'DFIkfmsdf
     const timer = setTimeout(() => {
       setShow(false);
       if (onClose) onClose();
-    }, 10000);
+    }, 8000);
     return () => clearTimeout(timer);
   }, [onClose]);
 
