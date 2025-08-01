@@ -11,7 +11,7 @@ const BannerPackage = () => {
                 <div className="absolute inset-0 flex items-center justify-between px-8 md:px-16 bg-black bg-opacity-40">
                     <div className="text-white max-w-lg space-y-4">
                         <h1 className="text-3xl md:text-5xl font-bold leading-tight">
-                            Escolha o melhor pacote <br /> que se encaixa em suas preferências
+                            Escolha o pacote <br />ideal para o seu bolso
                         </h1>
                         <p className="text-sm md:text-base leading-relaxed">
                     Escolha o melhor plano que se encaixa em suas preferências Escolha o melhor plano que se encaixa em suas preferências

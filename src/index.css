@@ -15,6 +15,13 @@
     font-family: 'Inter', sans-serif;
 }
 
+.oswald-uniquifier {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: #5d6f88;
+}
+
 .max-w-9xl {
     max-width: 1440px;
 }

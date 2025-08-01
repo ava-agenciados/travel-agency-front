@@ -1,11 +1,12 @@
 import NavBar from "../../components/Navbar/NavBar";
 import Footer from "../../components/Footer/Footer";
 import Images from "../../assets/image";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const ResearchResults = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const packages = location.state?.packages || [];
   const count = location.state?.count ?? 0;
   // Recupera os dados da pesquisa anterior
@@ -133,12 +134,12 @@ const ResearchResults = () => {
                       {/* Exemplo: pkg.accommodations?.map((a, idx) => <span key={idx}>{a}</span>) */}
                     </div>
                     <div className="flex justify-between items-center pt-2">
-                      <a
-                        href="#"
+                      <button
                         className="text-sm text-blue-700 font-medium hover:underline"
+                        onClick={() => navigate(`/package-details/${pkg.id}`)}
                       >
                         Detalhes
-                      </a>
+                      </button>
                       <button className="bg-blue-900 text-white px-4 py-2 text-sm rounded hover:bg-blue-800">
                         Reservar
                       </button>

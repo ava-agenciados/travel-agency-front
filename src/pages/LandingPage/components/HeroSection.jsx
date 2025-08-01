@@ -17,11 +17,23 @@ const HeroSection = () => {
  const [destination, setDestination] = useState("");
  const [loading, setLoading] = useState(false);
 
- function formatDateToInput(date) {
- return date.toISOString().split("T")[0];
- }
 
- const todayStr = formatDateToInput(new Date());
+// Função para formatar data yyyy-mm-dd (para input)
+function formatDateToInput(date) {
+  if (!date) return "";
+  if (typeof date === "string" && date.match(/^\d{4}-\d{2}-\d{2}$/)) return date;
+  const d = new Date(date);
+  return d.toISOString().split("T")[0];
+}
+
+// Função para formatar data dd/mm/yyyy (para API)
+function formatDateToAPI(dateStr) {
+  if (!dateStr) return "";
+  const [year, month, day] = dateStr.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+const todayStr = formatDateToInput(new Date());
 
  const category = [
  "Hospedagens",
@@ -60,8 +72,9 @@ const HeroSection = () => {
     }
     setLoading(true);
     try {
-      const departureFormated = new Date(startDate).toISOString();
-      const returnFormated = new Date(endDate).toISOString();
+      // Converte para formato dd/mm/yyyy apenas para a API
+      const departureFormated = formatDateToAPI(startDate);
+      const returnFormated = formatDateToAPI(endDate);
 
       const response = await api.get("/api/v1/packages/search", {
         params: {
@@ -73,7 +86,7 @@ const HeroSection = () => {
       });
       const packages = Array.isArray(response.data) ? response.data : [];
       const count = packages.length;
-      setResultados(packages);
+      // setResultados(packages); // Removido: não existe setResultados neste escopo
       navigate("/research-results", {
         state: {
           packages,
@@ -98,7 +111,7 @@ const HeroSection = () => {
         },
       });
     } finally {
-      // Simula atraso de 2 segundos antes de esconder o loading
+      // Simula atraso de 4 segundos antes de esconder o loading
       await new Promise(resolve => setTimeout(resolve, 4000));
       setLoading(false);
     }
@@ -136,8 +149,8 @@ return (
  <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] gap-6 items-start w-full max-w-9xl mx-auto">
  <div className="bg-white shadow-xl p-4 sm:p-6 flex flex-col gap-4">
  <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
- <div className="text-xl sm:text-2xl font-bold tracking-widest">
- --------- ------- --------
+ <div className="oswald-uniquifier text-xl sm:text-2xl tracking-widest">
+ Encontre seu destino ideal
  </div>
  <button className="text-xs font-semibold bg-[#E9EAFD] text-[#1877F2] border-2 border-[#1877F2] px-4 py-1 rounded-full whitespace-nowrap">
  PROMOÇÕES TODOS OS DIAS
@@ -183,31 +196,31 @@ return (
  </label>
  <div className="grid grid-cols-2 gap-2">
  <input
- type="date"
- name="departureDate"
- className="px-3 py-2 border rounded-md text-sm w-full"
- min={todayStr}
- aria-label="Data de ida"
- onChange={(e) => {
- setStartDate(e.target.value);
-
- if (endDate && e.target.value > endDate) {
- setEndDate("");
- }
- }}
- placeholder="Check-in"
+   type="date"
+   name="departureDate"
+   className="px-3 py-2 border rounded-md text-sm w-full"
+   min={todayStr}
+   aria-label="Data de ida"
+   value={startDate}
+   onChange={(e) => {
+     setStartDate(e.target.value);
+     if (endDate && e.target.value > endDate) {
+       setEndDate("");
+     }
+   }}
+   placeholder="Check-in"
  />
 
  <input
- type="date"
- name="returnDate"
- className="px-3 py-2 border rounded-md text-sm w-full"
- aria-label="Data de volta"
- value={endDate}
- min={startDate || todayStr}
- onChange={(e) => setEndDate(e.target.value)}
- placeholder="Check-out"
- disabled={!startDate}
+   type="date"
+   name="returnDate"
+   className="px-3 py-2 border rounded-md text-sm w-full"
+   aria-label="Data de volta"
+   value={endDate}
+   min={startDate || todayStr}
+   onChange={(e) => setEndDate(e.target.value)}
+   placeholder="Check-out"
+   disabled={!startDate}
  />
  </div>
  </div>

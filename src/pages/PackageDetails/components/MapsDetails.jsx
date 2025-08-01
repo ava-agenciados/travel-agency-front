@@ -1,7 +1,7 @@
 
-const MapsDetails = ({ latitude, longitude }) => {
-  const mapaSrc = `https://www.google.com/maps/embed/v1/view?key=${API_KEY}&center=${latitude},${longitude}&zoom=14&maptype=roadmap`;
-
+const MapsDetails = ({ zipcode }) => {
+  const API_KEY = import.meta.env.VITE_API_KEY;
+  const mapaSrc = `https://www.google.com/maps/embed/v1/search?key=${API_KEY}&q=${encodeURIComponent(zipcode)}`;
   return (
     <section>
       <div className="max-w-9xl mx-auto py-8">

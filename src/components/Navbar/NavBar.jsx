@@ -1,9 +1,19 @@
+import { useState } from "react";
+
 const NavBar = () => {
   localStorage.setItem("authToken", "eyKLSjkndfn89f_fsdkjnffsdf");
   localStorage.setItem("name", "Jamyle");
 
+
   const authToken = localStorage.getItem("authToken");
   const name = localStorage.getItem("name");
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  function handleLogout() {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("name");
+    window.location.reload();
+  }
 
   return (
     <header className="bg-gray-100 w-full border-b border-gray-200">
@@ -35,9 +45,33 @@ const NavBar = () => {
           alt="Perfil"
           className="w-6 h-6 rounded-full object-cover"
         />
-        <button>
-          {authToken ? name : "Entrar"}
-        </button>
+        <div
+          className="relative flex items-center"
+          onMouseEnter={() => setShowDropdown(true)}
+          onMouseLeave={() => setShowDropdown(false)}
+        >
+          {authToken ? (
+            <>
+              <button className="text-gray-800 hover:text-blue-600 focus:outline-none">
+                {name}
+              </button>
+              {showDropdown && (
+                <div className="absolute right-0 mt-14 w-20 bg-white border rounded shadow-lg z-50">
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={handleLogout}
+                  >
+                    Sair
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <a href="/login" className="text-gray-800 hover:text-blue-600">
+              Entrar
+            </a>
+          )}
+        </div>
       </div>
         </nav>
       </div>

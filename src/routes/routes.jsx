@@ -23,7 +23,7 @@ const Router = () => {
                     <Route path='/register' element={<Register/>} />
                     <Route path='/password-recovery' element={<PasswordRecovery/>} />
                     <Route path='/reset-password' element={<ResetPassword/>} />
-                    <Route path='/package-details' element={<PackageDetails/>} />
+                    <Route path='/package-details/:id' element={<PackageDetails/>} />
                     <Route path='/research-results' element={<ResearchResults/>} />
                     
                     {/* Rotas Protegidas */}
