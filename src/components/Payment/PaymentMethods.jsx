@@ -72,9 +72,9 @@ const PaymentMethods = forwardRef((props, ref) => {
         setShowRefusedModal(true);
         setTimeout(() => {
           setShowRefusedModal(false);
-          navigate('/notfound');
-        }, 10000);
-      }, 10000);
+          navigate('/payment');
+        }, 8000);
+      }, 8000);
     } else if (paymentMethod === 'pix') {
       if (!isAuthenticated) {
         setShowAuthModal(true);
@@ -90,10 +90,10 @@ const PaymentMethods = forwardRef((props, ref) => {
           setShowPixConfirmModal(true);
           setTimeout(() => {
             setShowPixConfirmModal(false);
-            navigate('/notfound');
-          }, 10000);
-        }, 10000);
-      }, 10000);
+            navigate('/mybookings');
+          }, 8000);
+        }, 8000);
+      }, 8000);
     } else if (paymentMethod === 'boleto') {
       if (!isAuthenticated) {
         setShowAuthModal(true);
@@ -105,9 +105,9 @@ const PaymentMethods = forwardRef((props, ref) => {
         setShowPendingModal(true);
         setTimeout(() => {
           setShowPendingModal(false);
-          navigate('/notfound');
-        }, 10000);
-      }, 10000);
+          navigate('/mybookings');
+        }, 8000);
+      }, 8000);
     }
     // Adicione lógica para outros métodos se necessário
   };
@@ -125,6 +125,7 @@ const PaymentMethods = forwardRef((props, ref) => {
       <button
         className="flex items-center gap-2 mb-4 sm:mb-6 text-[#223A5F] text-lg sm:text-2xl font-bold hover:underline focus:outline-none"
         style={{ background: 'none', border: 'none', padding: 0, boxShadow: 'none' }}
+        onClick={() => navigate('/package-review')}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M15 19L8 12L15 5" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>

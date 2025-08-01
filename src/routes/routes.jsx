@@ -3,7 +3,7 @@ import NotFound from '../pages/NotFound/NotFound.jsx'
 import LandingPage from '../pages/LandingPage/LandingPage.jsx'
 import Login from '../pages/Login/Login.jsx'
 import PasswordRecovery from '../pages/PasswordRecovery/PasswordRecovery.jsx'
-import Register from '../pages/Register/register.jsx'
+import Register from '../pages/Register/Register.jsx'
 import ResetPassword from '../pages/ResetPassword/ResetPassword.jsx'
 import AdminDashboard from '../pages/Admin/AdminDashboard.jsx'
 import AttendantDashboard from '../pages/Attendant/AttendantDashboard.jsx'
@@ -12,6 +12,7 @@ import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute.jsx'
 import UserProfile from '../pages/UserProfile/UserProfile.jsx'
 import Layout from '../components/UserProfile/Layout.jsx'
 import MyBookings from '../pages/UserProfile/MyBookings.jsx'
+import PackageReview from '../pages/PackageReview/PackageReview.jsx'
 
 const Router = () => {
 
@@ -26,6 +27,7 @@ const Router = () => {
                     <Route path='/password-recovery' element={<PasswordRecovery/>} />
                     <Route path='/reset-password' element={<ResetPassword/>} />
                     <Route path='/payment' element={<Payment/>} />
+                    <Route path='/package-review' element={<PackageReview/>} />
 
                     {/*rota pai*/}
                      <Route 

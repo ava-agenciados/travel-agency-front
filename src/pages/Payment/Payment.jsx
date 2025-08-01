@@ -2,7 +2,6 @@ import PaymentSteps from '../../components/Payment/PaymentSteps';
 import PaymentMethods from '../../components/Payment/PaymentMethods';
 import ConfirmPayment from '../../components/Payment/ConfirmPayment';
 import { useRef } from 'react';
-
 import NavBar from '../../components/Navbar/NavBar';
 import Footer from '../../components/Footer/Footer';
 
@@ -39,11 +38,11 @@ const Payment = () => {
               <div className="bg-white rounded-xl shadow p-0 flex flex-col overflow-hidden border border-gray-200">
                 <div className="bg-[#FFB800] px-3 py-1 w-fit rounded-br-lg rounded-tl-lg text-xs font-bold absolute mt-2 ml-2 z-10">Detalhes do pacote</div>
                 <div className="relative">
-                  <img src="/src/assets/images/bg_herosection.png" alt="Pacote" className="w-full h-28 object-cover" />
+                  <img src="/src/assets/images/Sorocaba.jpg" alt="Pacote" className="w-full h-28 object-cover" />
                 </div>
                 <div className="p-4">
-                  <h3 className="text-base font-bold text-[#223A5F] mb-1">Lorem ipsum sit amet delok sit amet dolok</h3>
-                  <p className="text-sm text-gray-600 leading-snug">Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia porro magni quaerat nostrum excepturi. Quasi qui veniam iusto molestias beatae, iste eius voluptatum consectetur et...</p>
+                  <h3 className="text-base font-bold text-[#223A5F] mb-1">Férias em Sorocaba</h3>
+                  <p className="text-sm text-gray-600 leading-snug">Aproveite suas férias em Sorocaba, fique hospedado no sítio do Célio, desfrute de passeios incríveis e relaxe em meio à natureza.</p>
                 </div>
               </div>
 
@@ -58,11 +57,11 @@ const Payment = () => {
             <div className="bg-white rounded-xl shadow p-0 flex flex-col overflow-hidden border border-gray-200">
               <div className="bg-[#FFB800] px-3 py-1 w-fit rounded-br-lg rounded-tl-lg text-xs font-bold absolute mt-2 ml-2 z-10">Detalhes do pacote</div>
               <div className="relative">
-                <img src="/src/assets/images/bg_herosection.png" alt="Pacote" className="w-full h-28 object-cover" />
+                <img src="/src/assets/images/Sorocaba.jpg" alt="Pacote" className="w-full h-28 object-cover" />
               </div>
               <div className="p-4">
-                <h3 className="text-base font-bold text-[#223A5F] mb-1">Lorem ipsum sit amet delok sit amet dolok</h3>
-                <p className="text-sm text-gray-600 leading-snug">Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia porro magni quaerat nostrum excepturi. Quasi qui veniam iusto molestias beatae, iste eius voluptatum consectetur et...</p>
+                <h3 className="text-base font-bold text-[#223A5F] mb-1">Férias em Sorocaba</h3>
+                <p className="text-sm text-gray-600 leading-snug">Aproveite suas férias em Sorocaba, fique hospedado no sítio do Célio, desfrute de passeios incríveis e relaxe em meio à natureza.</p>
               </div>
             </div>
 
