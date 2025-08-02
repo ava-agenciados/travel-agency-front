@@ -24,17 +24,17 @@ const Register = () => {
 
   // Função para lidar com mudanças nos inputs
   // Função para formatar telefone (DDD) XXXXX-XXXX
-  const formatPhoneNumber = (value) => {
-    // Remove tudo que não for número
-    let cleaned = value.replace(/\D/g, '');
-    // Limita a 11 dígitos
-    cleaned = cleaned.slice(0, 11);
-    if (cleaned.length <= 2) return cleaned;
-    if (cleaned.length <= 7) {
-      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
-    }
-    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
-  };
+  // const formatPhoneNumber = (value) => {
+  //   // Remove tudo que não for número
+  //   let cleaned = value.replace(/\D/g, '');
+  //   // Limita a 11 dígitos
+  //   cleaned = cleaned.slice(0, 11);
+  //   if (cleaned.length <= 2) return cleaned;
+  //   if (cleaned.length <= 7) {
+  //     return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
+  //   }
+  //   return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
+  // };
 
   // Função para lidar com mudanças nos inputs
   const handleChange = (e) => {
@@ -49,7 +49,7 @@ const Register = () => {
     } else if (name === 'phoneNumber') {
       setFormData(prev => ({
         ...prev,
-        phoneNumber: formatPhoneNumber(value)
+        phoneNumber: value
       }));
     } else {
       setFormData(prev => ({

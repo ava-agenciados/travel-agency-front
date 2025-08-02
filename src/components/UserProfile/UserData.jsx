@@ -1,17 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getUserProfile } from "../../services/userService";
 
 const UserData = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [userPhoto, setUserPhoto] = useState(null); // Estado para a foto do usuário
     const [isEditing, setIsEditing] = useState(false); // Estado para modo de edição
     
-    // Dados do usuário (normalmente viriam de uma API ou contexto)
-    const [userName, setUserName] = useState("Eryck Santos");
-    const [userPhone, setUserPhone] = useState("(11) 99999-9999");
-    const [userEmail, setUserEmail] = useState("erycksantos@mail.com");
+
+    // Estado para dados do usuário autenticado
+    const [userName, setUserName] = useState("");
+    const [userPhone, setUserPhone] = useState("");
+    const [userEmail, setUserEmail] = useState("");
+    const [userCpf, setUserCpf] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Busca dados do usuário autenticado ao montar o componente
+    useEffect(() => {
+        async function fetchUser() {
+            try {
+                setLoading(true);
+                const data = await getUserProfile();
+                setUserName(data.fullName || `${data.firstName || ''} ${data.lastName || ''}`.trim());
+                setUserPhone(data.phoneNumber || "");
+                setUserEmail(data.email || "");
+                setUserCpf(data.cpfPassport || "");
+                setError(null);
+            } catch (err) {
+                setError("Erro ao carregar dados do usuário.");
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchUser();
+    }, []);
     
     // Função para extrair iniciais do nome
     const getInitials = (name) => {
+        if (!name) return "";
         return name
             .split(' ')
             .map(word => word.charAt(0))
@@ -45,6 +71,12 @@ const UserData = () => {
     const togglePassword = () => {
         setShowPassword(!showPassword);
     };
+  if (loading) {
+    return <div className="text-center py-8">Carregando dados do usuário...</div>;
+  }
+  if (error) {
+    return <div className="text-center text-red-500 py-8">{error}</div>;
+  }
   return (
 <div className="bg-white rounded-xl shadow-lg w-full max-w-4xl p-4 sm:p-6 md:p-8 my-4">
                     
@@ -92,20 +124,11 @@ const UserData = () => {
                         <div className="border bg-white rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
                             <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                                 <span className="p-1 sm:p-2 font-semibold text-gray-500 text-sm sm:text-base">Nome:</span>
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={userName}
-                                        onChange={(e) => setUserName(e.target.value)}
-                                        className="p-1 sm:p-2 font-semibold text-[#223A5F] border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
-                                    />
-                                ) : (
-                                    <span className="p-1 sm:p-2 font-semibold text-[#223A5F] text-sm sm:text-base">{userName}</span>
-                                )}
+                                <span className="p-1 sm:p-2 font-semibold text-[#223A5F] text-sm sm:text-base">{userName}</span>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                                 <span className="p-1 sm:p-2 font-semibold text-gray-500 text-sm sm:text-base">CPF:</span>
-                                <span className="p-1 sm:p-2 font-semibold text-[#223A5F] text-sm sm:text-base">123.456.789-00</span>
+                                <span className="p-1 sm:p-2 font-semibold text-[#223A5F] text-sm sm:text-base">{userCpf}</span>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                                 <span className="p-1 sm:p-2 font-semibold text-gray-500 text-sm sm:text-base">Senha:</span>
@@ -126,46 +149,17 @@ const UserData = () => {
                         <div className="border bg-white rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
                             <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                                 <span className="p-1 sm:p-2 font-semibold text-gray-500 text-sm sm:text-base">Telefone:</span>
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={userPhone}
-                                        onChange={(e) => setUserPhone(e.target.value)}
-                                        className="p-1 sm:p-2 font-semibold text-[#223A5F] border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
-                                    />
-                                ) : (
-                                    <span className="p-1 sm:p-2 font-semibold text-[#223A5F] text-sm sm:text-base">{userPhone}</span>
-                                )}
+                                <span className="p-1 sm:p-2 font-semibold text-[#223A5F] text-sm sm:text-base">{userPhone}</span>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                                 <span className="p-1 sm:p-2 font-semibold text-gray-500 text-sm sm:text-base">Email:</span>
-                                {isEditing ? (
-                                    <input
-                                        type="email"
-                                        value={userEmail}
-                                        onChange={(e) => setUserEmail(e.target.value)}
-                                        className="p-1 sm:p-2 font-semibold text-[#223A5F] border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
-                                    />
-                                ) : (
-                                    <span className="p-1 sm:p-2 font-semibold text-[#223A5F] text-sm sm:text-base">{userEmail}</span>
-                                )}
+                                <span className="p-1 sm:p-2 font-semibold text-[#223A5F] text-sm sm:text-base">{userEmail}</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Botão de edição */}
-                    <div className="flex justify-center mt-4 sm:mt-6">
-                        <button
-                            onClick={toggleEdit}
-                            className={`px-4 sm:px-6 py-2 rounded-lg font-semibold transition-colors text-sm sm:text-base ${
-                                isEditing 
-                                    ? 'bg-green-500 hover:bg-green-600 text-white' 
-                                    : 'bg-blue-500 hover:bg-blue-600 text-white'
-                            }`}
-                        >
-                            {isEditing ? 'Salvar Alterações' : 'Editar Informações'}
-                        </button>
-                    </div>
+
+                    {/* Botão de edição removido pois os dados vêm da API e não são editáveis localmente */}
 
                 </div>
   );

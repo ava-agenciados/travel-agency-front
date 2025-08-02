@@ -1,4 +1,6 @@
-import { useState } from 'react';
+// Importa hooks e componentes necessários do React e do projeto
+import { useState, useEffect } from 'react';
+import { getUserProfile } from '../../services/userService';
 import { useNavigate } from 'react-router-dom';
 import CreditCardPaymentFlow from './Flow/CreditCardPaymentFlow';
 import ConfirmPayment from './ConfirmPayment';
@@ -13,13 +15,36 @@ import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
 import PendingModal from './Modals/PendingModal';
 
+// Componente principal de métodos de pagamento, usando forwardRef para expor funções ao pai
 const PaymentMethods = forwardRef((props, ref) => {
-  // Recebe dados do pacote, responsável, acompanhantes, datas via props
-  const { packageData, startTravel, endTravel, responsible, companions } = props;
+  // Recebe dados do pacote, acompanhantes e datas via props
+  const { packageData, startTravel, endTravel, companions } = props;
+  // Estado para o responsável pelo pagamento (usuário logado)
+  const [responsible, setResponsible] = useState(null);
+  // Busca dados do usuário logado ao montar o componente
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const user = await getUserProfile();
+        setResponsible({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          cpfPassport: user.cpfPassport,
+          phoneNumber: user.phoneNumber,
+        });
+      } catch {
+        setResponsible(null);
+      }
+    }
+    fetchUser();
+  }, []);
+  // Estado para o método de pagamento selecionado
   const [paymentMethod, setPaymentMethod] = useState('credit');
+  // Hook para navegação de rotas
   const navigate = useNavigate();
+  // Hook de autenticação
   const { isAuthenticated } = useAuth();
-  // Estado do formulário de cartão
+  // Estado dos campos do formulário de cartão de crédito
   const [fields, setFields] = useState({
     cardNumber: '',
     cardName: '',
@@ -27,16 +52,17 @@ const PaymentMethods = forwardRef((props, ref) => {
     cvv: '',
     document: '',
   });
+  // Estados para controle de modais e mensagens
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showRefusedModal, setShowRefusedModal] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
-  // Estados para fluxo Pix e Boleto
   const [showQrCodeModal, setShowQrCodeModal] = useState(false);
   const [showPixConfirmModal, setShowPixConfirmModal] = useState(false);
   const [showPendingModal, setShowPendingModal] = useState(false);
-  // Validação dos campos do cartão
+
+  // Função para validar os campos do cartão de crédito
   const isValid = (fields) => {
     const cardNumber = fields.cardNumber.replace(/\D/g, '');
     if (!cardNumber || cardNumber.length < 13) {
@@ -62,24 +88,105 @@ const PaymentMethods = forwardRef((props, ref) => {
     setErrorMessage('');
     return true;
   };
-  // Handler do botão de confirmação
+
+  // Função chamada ao confirmar o pagamento
   const handleConfirm = async () => {
+    // Função para normalizar CPF (remove tudo que não for número)
+    function normalizeCPF(cpf) {
+      if (!cpf) return '';
+      return cpf.replace(/\D/g, '');
+    }
+
+    // Função para normalizar telefone para formato internacional (+55DDDNUMERO)
+    function normalizePhone(phone) {
+      if (!phone) return '';
+      const onlyNumbers = phone.replace(/\D/g, '');
+      // Se já começa com 55 e tem 13 dígitos, retorna com +
+      if (onlyNumbers.length === 13 && onlyNumbers.startsWith('55')) {
+        return `+${onlyNumbers}`;
+      }
+      // Se tem 11 dígitos (celular), adiciona +55
+      if (onlyNumbers.length === 11) {
+        return `+55${onlyNumbers}`;
+      }
+      // Se tem 10 dígitos (fixo), adiciona +55
+      if (onlyNumbers.length === 10) {
+        return `+55${onlyNumbers}`;
+      }
+      // Caso contrário, retorna vazio (inválido)
+      return '';
+    }
+
+    // Normaliza os dados do responsável
+    const normalizedResponsible = {
+      ...responsible,
+      cpfPassport: normalizeCPF(responsible?.cpfPassport || responsible?.CPFPassport),
+      phoneNumber: normalizePhone(responsible?.phoneNumber || responsible?.PhoneNumber),
+    };
+    // Log para depuração dos dados do responsável
+    console.log('responsible:', responsible);
+    // Função para validar se um acompanhante tem todos os campos obrigatórios preenchidos
+    function isValidCompanion(c) {
+      return (
+        c &&
+        c.firstName && c.lastName &&
+        c.cpfPassport && c.phoneNumber
+      );
+    }
+
+    // Filtra apenas acompanhantes válidos
+    const validCompanions = Array.isArray(companions)
+      ? companions.filter(isValidCompanion)
+      : [];
+
+    // Validação dos campos do responsável
+    // Validação dos campos do responsável (CPFPassport: 11 dígitos, PhoneNumber: formato internacional)
+    if (!normalizedResponsible.cpfPassport || normalizedResponsible.cpfPassport.length < 11) {
+      setErrorMessage('CPF/Passaporte do responsável está vazio ou inválido.');
+      setShowErrorModal(true);
+      return;
+    }
+    if (!normalizedResponsible.phoneNumber || !/^\+55\d{10,11}$/.test(normalizedResponsible.phoneNumber)) {
+      setErrorMessage('Telefone do responsável está vazio ou em formato inválido. Use o formato +55DDDNÚMERO.');
+      setShowErrorModal(true);
+      return;
+    }
+    // Se não autenticado, mostra modal de login
     if (!isAuthenticated) {
       setShowAuthModal(true);
       return;
     }
-    // Mapear método de pagamento para o backend
-    let paymentMethodValue = 0;
-    if (paymentMethod === 'pix') paymentMethodValue = 1;
-    else if (paymentMethod === 'boleto') paymentMethodValue = 2;
-    else if (paymentMethod === 'credit') paymentMethodValue = 3;
+    // Mapeia o método de pagamento para o valor esperado pelo backend
+    let paymentMethodValue;
+    if (paymentMethod === 'pix') paymentMethodValue = 3; // Pix
+    else if (paymentMethod === 'boleto') paymentMethodValue = 2; // Boleto
+    else if (paymentMethod === 'credit') paymentMethodValue = 0; // Cartão de Crédito
+    // else if (paymentMethod === 'debit') paymentMethodValue = 4; // Cartão de Débito
+    else {
+      setErrorMessage('Método de pagamento inválido.');
+      setShowErrorModal(true);
+      return;
+    }
 
-    // Montar paymentMethods
+    // Monta o objeto de método de pagamento
+    // Função auxiliar para converter data ISO para dd/MM/yyyy
+    function formatDateBR(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
     let paymentMethodObj = {
       paymentMethod: paymentMethodValue,
-      paymentDate: new Date().toISOString(),
-      transactionId: '',
+      paymentDate: formatDateBR(new Date()),
+      CPFPassport: normalizedResponsible.cpfPassport || '',
+      PhoneNumber: normalizedResponsible.phoneNumber || '',
+      // Só inclui transactionId se houver valor válido (GUID), senão omite
     };
+    // Se for cartão de crédito, valida e adiciona campos extras
     if (paymentMethod === 'credit') {
       if (!isValid(fields)) {
         setShowErrorModal(true);
@@ -87,38 +194,47 @@ const PaymentMethods = forwardRef((props, ref) => {
       }
       paymentMethodObj = {
         ...paymentMethodObj,
-        firstName: responsible?.firstName || '',
-        lastName: responsible?.lastName || '',
+        firstName: normalizedResponsible?.firstName || '',
+        lastName: normalizedResponsible?.lastName || '',
         cardNumber: fields.cardNumber,
         cardHolderName: fields.cardName,
         expirationDate: fields.expiry,
         cvv: fields.cvv,
         installments: 1, // pode ser ajustado
         isCreditCard: true,
-        cpfPassport: responsible?.cpfPassport || '',
-        phoneNumber: responsible?.phoneNumber || '',
       };
     }
 
-    // Montar payload
+    // Função auxiliar para converter data ISO para dd/MM/yyyy
+    function formatDateBR(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    // Monta o payload para enviar à API
     const payload = {
       packageID: packageData?.id,
-      startTravel,
-      endTravel,
-      companions: companions.map(c => ({
-        firstName: c.firstName,
-        lastName: c.lastName,
-        cpfPassport: c.cpfPassport,
-        isForeigner: c.isForeigner,
-        phoneNumber: c.phoneNumber,
-      })),
-      paymentMethods: [paymentMethodObj],
+      startTravel: formatDateBR(startTravel),
+      endTravel: formatDateBR(endTravel),
+      companions: validCompanions,
+      paymentMethods: [
+        // Remove transactionId se não houver valor válido
+        paymentMethodObj.transactionId === undefined
+          ? paymentMethodObj
+          : { ...paymentMethodObj, transactionId: undefined }
+      ],
       hasTravelInsurance: false, // pode ser ajustado
       hasTourGuide: false,
       hasTour: false,
       hasActivities: false,
+      createNewBooking: true,
     };
 
+    // Mostra loading e faz a requisição
     setShowLoading(true);
     try {
       await api.put('/api/v1/bookings/payment', payload);
@@ -131,17 +247,20 @@ const PaymentMethods = forwardRef((props, ref) => {
       setErrorMessage('Erro ao processar pagamento.');
     }
   };
-  // Handlers de login/cadastro (exemplo, ajuste conforme necessário)
+
+  // Handlers para login/cadastro (usados nos modais)
   const handleLogin = () => setShowAuthModal(false);
   const handleRegister = () => setShowAuthModal(false);
 
-  // Expor função para o componente pai
+  // Expõe a função handleConfirm para o componente pai via ref
   useImperativeHandle(ref, () => ({
     handleConfirm
   }));
 
+  // Renderização do componente
   return (
     <div className="flex-1 bg-white rounded-xl shadow p-4 sm:p-6">
+      {/* Botão para voltar para a revisão do pacote */}
       <button
         className="flex items-center gap-2 mb-4 sm:mb-6 text-[#223A5F] text-lg sm:text-2xl font-bold hover:underline focus:outline-none"
         style={{ background: 'none', border: 'none', padding: 0, boxShadow: 'none' }}
@@ -154,7 +273,7 @@ const PaymentMethods = forwardRef((props, ref) => {
       </button>
       <h2 className="text-sm sm:text-base font-bold mb-4">Dados do pagamento</h2>
       <div className="space-y-3">
-        {/* Cartão de crédito */}
+        {/* Opção de cartão de crédito */}
         <div className={`border rounded-lg p-3 flex flex-col gap-2 ${paymentMethod === 'credit' ? 'border-blue-600 bg-blue-50' : ''}`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <label className="flex items-center gap-2 cursor-pointer flex-wrap">
@@ -180,7 +299,7 @@ const PaymentMethods = forwardRef((props, ref) => {
             </div>
           )}
         </div>
-        {/* Pix */}
+        {/* Opção de Pix */}
         <div className={`border rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${paymentMethod === 'pix' ? 'border-blue-600 bg-blue-50' : ''}`}>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -194,7 +313,7 @@ const PaymentMethods = forwardRef((props, ref) => {
           </label>
           <button className="bg-yellow-400 text-xs font-bold rounded px-2 py-1 w-fit self-start sm:self-center">5% Desconto</button>
         </div>
-        {/* Boleto */}
+        {/* Opção de Boleto */}
         <div className={`border rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${paymentMethod === 'boleto' ? 'border-blue-600 bg-blue-50' : ''}`}>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -233,6 +352,7 @@ const PaymentMethods = forwardRef((props, ref) => {
           </div>
         </div>
       )}
+      
       {showLoading && <IconLoading />}
       {showPendingModal && <PendingModal onClose={() => setShowPendingModal(false)} />}
       {showQrCodeModal && <QrCodeModal onClose={() => setShowQrCodeModal(false)} />}
@@ -243,4 +363,5 @@ const PaymentMethods = forwardRef((props, ref) => {
   );
 });
 
+// Exporta o componente para uso em outros lugares
 export default PaymentMethods;

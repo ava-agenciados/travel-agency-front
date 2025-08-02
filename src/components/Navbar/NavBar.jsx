@@ -1,17 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getUserProfile } from "../../services/userService";
 
 const NavBar = () => {
-  localStorage.setItem("authToken", "eyKLSjkndfn89f_fsdkjnffsdf");
-  localStorage.setItem("name", "Jamyle");
-
 
   const authToken = localStorage.getItem("authToken");
-  const name = localStorage.getItem("name");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // Busca nome do usuário autenticado
+  useEffect(() => {
+    async function fetchUser() {
+      if (!authToken) {
+        setUserName("");
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const data = await getUserProfile();
+        setUserName(`${data.firstName}`.trim());
+      } catch {
+        setUserName("");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUser();
+  }, [authToken]);
 
   function handleLogout() {
     localStorage.removeItem("authToken");
-    localStorage.removeItem("name");
     window.location.reload();
   }
 
@@ -40,20 +59,24 @@ const NavBar = () => {
           </ul>
 
           <div className="flex items-center bg-gray-200 rounded-full px-3 py-1 gap-2">
-        <img
-          src="https://thumbs.dreamstime.com/b/vetor-de-%C3%ADcone-perfil-do-avatar-padr%C3%A3o-foto-usu%C3%A1rio-m%C3%ADdia-social-183042379.jpg" 
-          alt="Perfil"
-          className="w-6 h-6 rounded-full object-cover"
-        />
+        {/* Avatar com iniciais do usuário */}
         <div
-          className="relative flex items-center"
-          onMouseEnter={() => setShowDropdown(true)}
-          onMouseLeave={() => setShowDropdown(false)}
+          className="w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-xs select-none"
+          style={{ minWidth: 24, minHeight: 24 }}
         >
+          {authToken && userName
+            ? userName.split(" ").map(word => word[0]).join("").toUpperCase().slice(0,2)
+            : <span className="text-gray-200">?</span>}
+        </div>
+        <div className="relative flex items-center">
           {authToken ? (
             <>
-              <button className="text-gray-800 hover:text-blue-600 focus:outline-none">
-                {name}
+              <button
+                className="text-gray-800 hover:text-blue-600 focus:outline-none"
+                onClick={() => setShowDropdown((prev) => !prev)}
+                disabled={loading}
+              >
+                {loading ? "..." : userName}
               </button>
               {showDropdown && (
                 <div className="absolute right-0 mt-14 w-20 bg-white border rounded shadow-lg z-50">
