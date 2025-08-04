@@ -6,6 +6,17 @@ import Images from "../../../assets/image";
 import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  // Cookie policy popup
+  const [showCookie, setShowCookie] = useState(false);
+  useEffect(() => {
+    if (!localStorage.getItem('cookieAccepted')) {
+      setShowCookie(true);
+    }
+  }, []);
+  function handleAcceptCookie() {
+    localStorage.setItem('cookieAccepted', 'true');
+    setShowCookie(false);
+  }
  const [selectedIdx, setSelectedIdx] = useState(null);
  const [isOverflowing, setIsOverflowing] = useState(false);
  const scrollRef = useRef(null);
@@ -97,7 +108,7 @@ const todayStr = formatDateToInput(new Date());
           endDate,
         },
       });
-      console.log("Resultados:", response.data);
+      // console.log("Resultados:", response.data);
     } catch (error) {
       console.error("Erro ao buscar:", error);
       navigate("/research-results", {
@@ -118,10 +129,10 @@ const todayStr = formatDateToInput(new Date());
   };
 
 
-return (
-  <>
-    {loading && <LoadingOverlay />}
-    <section className="relative bg-gray-100 pt-[320px] pb-10">
+  return (
+    <>
+      {loading && <LoadingOverlay />}
+      <section className="relative bg-gray-100 pt-[400px] pb-10">
  <div
  className="absolute top-0 left-0 w-full h-[300px] bg-cover bg-center z-0"
  style={{ backgroundImage: `url(${Images.Bg_HeroSection})` }}
@@ -137,11 +148,11 @@ return (
  ref={scrollRef}
  className="w-full overflow-x-auto scrollbar-hiden scroll-smooth"
  >
- <CategoryScroll
+ {/* <CategoryScroll
  category={category}
  selectedIdx={selectedIdx}
  setSelectedIdx={setSelectedIdx}
- />
+ /> */}
  </div>
  </div>
  </div>
@@ -157,7 +168,7 @@ return (
  </button>
  </div>
 
- <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+ <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
  <div className="flex flex-col">
  <label className="text-sm text-gray-600 mb-1">
  Onde você está?
@@ -171,10 +182,6 @@ return (
  onChange={(e) => setOrigin(e.target.value)}
  />
 
- <div className="mt-2 flex items-center text-xs text-gray-500">
- <input id="workTrip" type="checkbox" className="mr-2" />
- <label htmlFor="workTrip">Estou viajando a trabalho</label>
- </div>
  </div>
  <div className="flex flex-col">
  <label className="text-sm text-gray-600 mb-1">
@@ -256,12 +263,24 @@ return (
  </div>
  </div>
  </div>
-</section>
+      </section>
 
-
-
-</>
-);
+      {/* Cookie Policy Popup */}
+      {showCookie && (
+        <div className="fixed bottom-0 left-0 w-full z-50 flex justify-center items-end">
+          <div className="bg-gray-900 text-white rounded-t-lg shadow-lg p-4 mb-2 flex flex-col sm:flex-row items-center gap-4 max-w-xl w-full mx-2">
+            <span className="text-sm flex-1">Este site utiliza cookies para melhorar sua experiência. Ao continuar navegando, você concorda com nossa <span className="underline">política de cookies</span>.</span>
+            <button
+              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2 rounded-full transition"
+              onClick={handleAcceptCookie}
+            >
+              Ok
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
 };
 
 export default HeroSection;
