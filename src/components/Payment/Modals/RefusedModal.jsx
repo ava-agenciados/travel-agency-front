@@ -14,9 +14,25 @@ const RefusedModal = ({ onClose }) => {
 
   if (!show) return null;
 
+  // Fecha ao clicar fora do modal
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setShow(false);
+      if (onClose) onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" onClick={handleBackdropClick}>
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm flex flex-col items-center relative animate-fade-in">
+        {/* Botão X para fechar */}
+        <button
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none"
+          onClick={() => { setShow(false); if (onClose) onClose(); }}
+          aria-label="Fechar"
+        >
+          &times;
+        </button>
         <img
           src={Images.IconRefuse}
           alt="Recusado"

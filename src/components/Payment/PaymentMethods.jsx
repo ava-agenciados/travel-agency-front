@@ -17,8 +17,12 @@ import PendingModal from './Modals/PendingModal';
 
 // Componente principal de métodos de pagamento, usando forwardRef para expor funções ao pai
 const PaymentMethods = forwardRef((props, ref) => {
-  // Recebe dados do pacote, acompanhantes e datas via props
+  // Recebe dados do pacote, acompanhantes e datas via props (primeira linha do corpo do componente)
   const { packageData, startTravel, endTravel, companions } = props;
+  // Log para depuração dos acompanhantes recebidos via props (evita ReferenceError)
+  useEffect(() => {
+    console.log('companions recebidos no PaymentMethods:', companions);
+  }, [companions]);
   // Estado para o responsável pelo pagamento (usuário logado)
   const [responsible, setResponsible] = useState(null);
   // Busca dados do usuário logado ao montar o componente
@@ -51,6 +55,7 @@ const PaymentMethods = forwardRef((props, ref) => {
     expiry: '',
     cvv: '',
     document: '',
+    installments: '', // Adiciona o campo de parcelas
   });
   // Estados para controle de modais e mensagens
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -91,6 +96,20 @@ const PaymentMethods = forwardRef((props, ref) => {
 
   // Função chamada ao confirmar o pagamento
   const handleConfirm = async () => {
+    // Função para validar se um acompanhante tem todos os campos obrigatórios preenchidos
+    function isValidCompanion(c) {
+      return (
+        c &&
+        c.firstName && c.lastName &&
+        c.cpfPassport && c.phoneNumber
+      );
+    }
+    // Filtra apenas acompanhantes válidos (declaração única)
+    const validCompanions = Array.isArray(companions)
+      ? companions.filter(isValidCompanion)
+      : [];
+    // Log para depuração dos acompanhantes antes do envio
+    console.log('companions enviados no payload:', validCompanions);
     // Função para normalizar CPF (remove tudo que não for número)
     function normalizeCPF(cpf) {
       if (!cpf) return '';
@@ -134,10 +153,7 @@ const PaymentMethods = forwardRef((props, ref) => {
       );
     }
 
-    // Filtra apenas acompanhantes válidos
-    const validCompanions = Array.isArray(companions)
-      ? companions.filter(isValidCompanion)
-      : [];
+    // ...
 
     // Validação dos campos do responsável
     // Validação dos campos do responsável (CPFPassport: 11 dígitos, PhoneNumber: formato internacional)
@@ -158,10 +174,11 @@ const PaymentMethods = forwardRef((props, ref) => {
     }
     // Mapeia o método de pagamento para o valor esperado pelo backend
     let paymentMethodValue;
-    if (paymentMethod === 'pix') paymentMethodValue = 3; // Pix
+    // Corrige o mapeamento conforme backend
+    if (paymentMethod === 'pix') paymentMethodValue = 1; // Pix
     else if (paymentMethod === 'boleto') paymentMethodValue = 2; // Boleto
-    else if (paymentMethod === 'credit') paymentMethodValue = 0; // Cartão de Crédito
-    // else if (paymentMethod === 'debit') paymentMethodValue = 4; // Cartão de Débito
+    else if (paymentMethod === 'credit') paymentMethodValue = 3; // Cartão de Crédito
+    else if (paymentMethod === 'debit') paymentMethodValue = 4; // Cartão de Débito
     else {
       setErrorMessage('Método de pagamento inválido.');
       setShowErrorModal(true);
@@ -179,11 +196,21 @@ const PaymentMethods = forwardRef((props, ref) => {
       return `${day}/${month}/${year}`;
     }
 
+    // Função auxiliar para converter data para dd/MM/yyyy
+    function toDDMMYYYY(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
     let paymentMethodObj = {
       paymentMethod: paymentMethodValue,
-      paymentDate: formatDateBR(new Date()),
-      CPFPassport: normalizedResponsible.cpfPassport || '',
-      PhoneNumber: normalizedResponsible.phoneNumber || '',
+      paymentDate: toDDMMYYYY(new Date()),
+      cpfPassport: normalizedResponsible.cpfPassport || '',
+      phoneNumber: normalizedResponsible.phoneNumber || '',
       // Só inclui transactionId se houver valor válido (GUID), senão omite
     };
     // Se for cartão de crédito, valida e adiciona campos extras
@@ -200,7 +227,7 @@ const PaymentMethods = forwardRef((props, ref) => {
         cardHolderName: fields.cardName,
         expirationDate: fields.expiry,
         cvv: fields.cvv,
-        installments: 1, // pode ser ajustado
+        installments: parseInt(fields.installments, 10) || 1,
         isCreditCard: true,
       };
     }
@@ -215,32 +242,66 @@ const PaymentMethods = forwardRef((props, ref) => {
       return `${day}/${month}/${year}`;
     }
 
+    // Função para converter data ISO para dd/MM/yyyy
+    function toDDMMYYYY(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
     // Monta o payload para enviar à API
     const payload = {
       packageID: packageData?.id,
-      startTravel: formatDateBR(startTravel),
-      endTravel: formatDateBR(endTravel),
+      startTravel: toDDMMYYYY(startTravel),
+      endTravel: toDDMMYYYY(endTravel),
       companions: validCompanions,
       paymentMethods: [
-        // Remove transactionId se não houver valor válido
-        paymentMethodObj.transactionId === undefined
-          ? paymentMethodObj
-          : { ...paymentMethodObj, transactionId: undefined }
+        paymentMethodObj
       ],
-      hasTravelInsurance: false, // pode ser ajustado
+      hasTravelInsurance: false, 
       hasTourGuide: false,
       hasTour: false,
       hasActivities: false,
       createNewBooking: true,
     };
 
-    // Mostra loading e faz a requisição
+    if (paymentMethod === 'pix') {
+      setShowQrCodeModal(true);
+      setTimeout(() => {
+        setShowQrCodeModal(false);
+        setShowLoading(true);
+        setTimeout(() => {
+          setShowLoading(false);
+          setShowPixConfirmModal(true);
+          setTimeout(() => {
+            setShowPixConfirmModal(false);
+            navigate('/mybookings');
+          }, 3400);
+        }, 2000);
+      }, 3500);
+      return;
+    }
+    if (paymentMethod === 'boleto') {
+      setShowLoading(true);
+      setTimeout(() => {
+        setShowLoading(false);
+        setShowPendingModal(true);
+        setTimeout(() => {
+          setShowPendingModal(false);
+          navigate('/mybookings');
+        }, 4000);
+      }, 3000);
+      return;
+    }
+    // Cartão, boleto, etc: fluxo normal
     setShowLoading(true);
     try {
       await api.put('/api/v1/bookings/payment', payload);
       setShowLoading(false);
-      // Sucesso: redireciona para bookings ou página de sucesso
-      navigate('/mybookings');
+      setShowRefusedModal(true); // Mostra o modal de recusado mesmo com sucesso
     } catch (e) {
       setShowLoading(false);
       setShowErrorModal(true);
@@ -295,7 +356,7 @@ const PaymentMethods = forwardRef((props, ref) => {
           </div>
           {paymentMethod === 'credit' && (
             <div className="mt-2">
-              <CreditCardPaymentFlow fields={fields} setFields={setFields} />
+              <CreditCardPaymentFlow fields={fields} setFields={setFields} packagePrice={packageData?.price} />
             </div>
           )}
         </div>

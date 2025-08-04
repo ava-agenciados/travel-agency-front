@@ -18,7 +18,7 @@ const QrCodeModal = ({ onClose, qrCodeUrl = Images.IconQrCode, code = 'DFIkfmsdf
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 5000);
   };
 
   return (

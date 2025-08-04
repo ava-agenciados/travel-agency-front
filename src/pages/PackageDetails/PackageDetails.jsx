@@ -1,6 +1,6 @@
 // components/ImageGallery.jsx
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import api from '../../services/api';
 import NavBar from '../../components/Navbar/NavBar';
 import Footer from '../../components/Footer/Footer';
@@ -12,7 +12,7 @@ import Accommodations from './components/Accommodations';
 import AuthorInfo from './components/AuthorInfo';
 import RatingsList from './components/RatingsList';
 import LoadingOverlay from '../../components/LoadingOverlay';
-
+import { formatPrice } from '../../utils/formatPrice';
 
 export default function PackageDetails() {
   const { id } = useParams();
@@ -20,9 +20,6 @@ export default function PackageDetails() {
   const [loading, setLoading] = useState(true);
   const [lodgingInfo, setLodgingInfo] = useState(null);
   const [zipCode, setZipCode] = useState('');
-  // Datas de ida e volta vindas do pacote
-
-  // Função para garantir formato yyyy-MM-dd
 
   function formatDate(dateStr) {
     if (!dateStr) return '';
@@ -45,29 +42,31 @@ export default function PackageDetails() {
   const startTravel = formatDate(getDateField(packageData, ['departureDate', 'startDate', 'start_date', 'start_travel']));
   const endTravel = formatDate(getDateField(packageData, ['returnDate', 'endDate', 'end_date', 'end_travel']));
 
-  console.log('Start Travel:', startTravel);
-  console.log('End Travel:', endTravel);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Função para reservar (redireciona para /package-review com dados)
-  const navigate = useNavigate();
-  const handleReserve = () => {
+  // Função para reservar
+  const navigate = require('react-router-dom').useNavigate();
+  const handleReserve = async () => {
     if (!startTravel || !endTravel) {
       alert('Não há datas de viagem disponíveis para este pacote.');
       return;
     }
     setIsSubmitting(true);
-    // Envia os dados via estado de navegação
-    navigate('/package-review', {
-      state: {
+    try {
+      const payload = {
         packageID: id,
         startTravel,
         endTravel,
-      }
-    });
-    setIsSubmitting(false);
+      };
+      await api.post('/api/v1/package-review', payload);
+      navigate('/package-review');
+    } catch (error) {
+      alert('Erro ao realizar reserva.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const BASE_URL = "https://localhost:8080/";
+  const BASE_URL = "http://localhost:5110/";
 
   useEffect(() => {
     async function fetchPackage() {
@@ -139,7 +138,6 @@ export default function PackageDetails() {
     );
   }
 
-  console.log('Images:', images);
   return (
     <>
       <NavBar />
@@ -161,6 +159,7 @@ export default function PackageDetails() {
           <div className="bg-white rounded-lg shadow-md p-6 space-y-6 h-fit">
             <h4 className="text-sm font-semibold text-gray-700">Resumo</h4>
             <div className="flex flex-col gap-2">
+              <h2>Data de Início da viagem</h2>
               <input
                 type="date"
                 className="border rounded px-3 py-2 text-sm bg-gray-100"
@@ -169,6 +168,7 @@ export default function PackageDetails() {
                 disabled
                 placeholder="Início da viagem"
               />
+              <h2>Data de Fim da viagem</h2>
               <input
                 type="date"
                 className="border rounded px-3 py-2 text-sm bg-gray-100"
@@ -179,7 +179,24 @@ export default function PackageDetails() {
               />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-800">{packageData.price ? `R$ ${packageData.price}` : 'Preço não informado'}</p>
+              {/* Preço do pacote: valor original cortado e valor promocional */}
+              {packageData.price ? (
+                <p className="text-lg font-bold text-gray-800">
+                  {packageData.discountPercent && packageData.discountPercent > 0 ? (
+                    <>
+                      <span className="line-through text-gray-400 mr-2">R$ {(Number(packageData.price) * 1.2).toLocaleString('pt-BR')}</span>
+                      R$ {(Number(packageData.price) * (1 - packageData.discountPercent / 100)).toLocaleString('pt-BR')}
+                    </>
+                  ) : (
+                    <>
+                      <span className="line-through text-gray-400 mr-2">R$ {(Number(packageData.price) * 1.2).toLocaleString('pt-BR')}</span>
+                      R$ {Number(packageData.price).toLocaleString('pt-BR')}
+                    </>
+                  )}
+                </p>
+              ) : (
+                <p className="text-lg font-bold text-gray-800">Preço não informado</p>
+              )}
             </div>
             <button
               className="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2 rounded disabled:opacity-60"

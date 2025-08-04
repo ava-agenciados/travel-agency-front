@@ -14,7 +14,15 @@ const Payment = () => {
   const startTravel = location.state?.startTravel;
   const endTravel = location.state?.endTravel;
   const responsible = location.state?.responsible;
-  const companions = location.state?.companions;
+  let companions = location.state?.companions;
+  if (!companions) {
+    try {
+      const stored = sessionStorage.getItem('companions');
+      companions = stored ? JSON.parse(stored) : [];
+    } catch {
+      companions = [];
+    }
+  }
 
   // Referência para acessar a função de confirmação do PaymentMethods
   const paymentMethodsRef = useRef();

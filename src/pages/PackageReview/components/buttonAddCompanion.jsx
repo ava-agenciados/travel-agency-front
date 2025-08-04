@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 
-const Button = ({ onClick }) => {
+const Button = ({ onClick }) => { 
   return (
     <StyledWrapper>
       <button className="full-rounded" onClick={onClick}>

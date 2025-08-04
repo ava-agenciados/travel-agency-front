@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import PasswordField from '../PasswordField/PasswordField';
 
 
-const CreditCardForm = ({ fields, setFields }) => {
+const CreditCardForm = ({ fields, setFields, packagePrice = 0 }) => {
   const [documentType, setDocumentType] = useState('CPF');
+  // O valor de installments agora é controlado pelo state compartilhado (fields)
   // Máscara e validação para CPF
   function formatCPF(value) {
     return value
@@ -101,6 +102,28 @@ const CreditCardForm = ({ fields, setFields }) => {
             variant="light"
           />
         </div>
+      </div>
+      {/* Select de parcelas */}
+      <div className="flex flex-col gap-2">
+        <label className="text-xs font-semibold text-gray-700">Número de parcelas</label>
+        <select
+          value={fields.installments}
+          onChange={e => setFields(f => ({ ...f, installments: e.target.value }))}
+          className="border border-gray-300 rounded px-2 py-2 text-sm bg-[#F8F9FB] focus:outline-none w-full sm:w-40"
+        >
+          {[...Array(12)].map((_, i) => (
+            <option key={i + 1} value={i + 1}>
+              {i + 1}x
+            </option>
+          ))}
+        </select>
+        <span className="text-xs text-gray-600 mt-1">
+          {packagePrice > 0 && (
+            <>
+              {fields.installments}x de R$ {(packagePrice / Number(fields.installments || 1)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </>
+          )}
+        </span>
       </div>
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="flex flex-col flex-1 gap-2">

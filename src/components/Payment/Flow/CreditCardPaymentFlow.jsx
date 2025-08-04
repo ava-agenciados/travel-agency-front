@@ -8,10 +8,11 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreditCardForm from '../CreditCardForm';
 
-const CreditCardPaymentFlow = ({ fields, setFields, showForm = true }) => {
+
+const CreditCardPaymentFlow = ({ fields, setFields, showForm = true, packagePrice }) => {
   return (
     <>
-      {showForm && <CreditCardForm fields={fields} setFields={setFields} />}
+      {showForm && <CreditCardForm fields={fields} setFields={setFields} packagePrice={packagePrice} />}
     </>
   );
 };

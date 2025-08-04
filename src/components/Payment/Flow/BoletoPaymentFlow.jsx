@@ -19,7 +19,7 @@ const BoletoPaymentFlow = ({ hideButton }) => {
     setTimeout(() => {
       setShowPendingModal(false);
       navigate('/notfound');
-    }, 3500);
+    }, 5000);
   };
 
   const handleLogin = () => {
