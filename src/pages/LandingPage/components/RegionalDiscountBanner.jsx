@@ -5,7 +5,7 @@ import api from '../../../services/api';
 const RegionalDiscountBanner = () => {
     const [regionOffers, setRegionOffers] = useState([]);
     const navigate = useNavigate();
-    const BASE_URL = "http://localhost:5110/";
+    const BASE_URL = "https://localhost:8080/";
 
     useEffect(() => {
         async function fetchPackages() {

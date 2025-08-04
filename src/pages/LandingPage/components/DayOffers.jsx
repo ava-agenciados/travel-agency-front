@@ -5,7 +5,7 @@ import api from "../../../services/api";
 const DayOffers = () => {
 
     const [offers, setOffers] = useState([]);
-    const BASE_URL = "http://localhost:5110/";
+    const BASE_URL = "https://localhost:8080/";
 
     useEffect(() => {
       async function fetchOffers() {

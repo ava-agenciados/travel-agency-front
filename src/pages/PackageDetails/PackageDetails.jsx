@@ -13,6 +13,7 @@ import AuthorInfo from './components/AuthorInfo';
 import RatingsList from './components/RatingsList';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import { formatPrice } from '../../utils/formatPrice';
+import { useNavigate } from 'react-router-dom';
 
 export default function PackageDetails() {
   const { id } = useParams();
@@ -44,9 +45,9 @@ export default function PackageDetails() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Função para reservar
-  const navigate = require('react-router-dom').useNavigate();
+  const navigate = useNavigate();
   const handleReserve = async () => {
-    if (!startTravel || !endTravel) {
+    if (!startTravel || !endTravel || null) {
       alert('Não há datas de viagem disponíveis para este pacote.');
       return;
     }
@@ -57,8 +58,8 @@ export default function PackageDetails() {
         startTravel,
         endTravel,
       };
-      await api.post('/api/v1/package-review', payload);
-      navigate('/package-review');
+      navigate('/package-review', { state: payload });
+
     } catch (error) {
       alert('Erro ao realizar reserva.');
     } finally {
@@ -66,7 +67,7 @@ export default function PackageDetails() {
     }
   };
 
-  const BASE_URL = "http://localhost:5110/";
+  const BASE_URL = "https://localhost:8080/";
 
   useEffect(() => {
     async function fetchPackage() {

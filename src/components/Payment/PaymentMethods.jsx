@@ -175,9 +175,9 @@ const PaymentMethods = forwardRef((props, ref) => {
     // Mapeia o método de pagamento para o valor esperado pelo backend
     let paymentMethodValue;
     // Corrige o mapeamento conforme backend
-    if (paymentMethod === 'pix') paymentMethodValue = 1; // Pix
+    if (paymentMethod === 'pix') paymentMethodValue = 3; // Pix
     else if (paymentMethod === 'boleto') paymentMethodValue = 2; // Boleto
-    else if (paymentMethod === 'credit') paymentMethodValue = 3; // Cartão de Crédito
+    else if (paymentMethod === 'credit') paymentMethodValue = 0; // Cartão de Crédito
     else if (paymentMethod === 'debit') paymentMethodValue = 4; // Cartão de Débito
     else {
       setErrorMessage('Método de pagamento inválido.');
@@ -268,40 +268,37 @@ const PaymentMethods = forwardRef((props, ref) => {
       createNewBooking: true,
     };
 
-    if (paymentMethod === 'pix') {
-      setShowQrCodeModal(true);
-      setTimeout(() => {
-        setShowQrCodeModal(false);
-        setShowLoading(true);
-        setTimeout(() => {
-          setShowLoading(false);
-          setShowPixConfirmModal(true);
-          setTimeout(() => {
-            setShowPixConfirmModal(false);
-            navigate('/mybookings');
-          }, 3400);
-        }, 2000);
-      }, 3500);
-      return;
-    }
-    if (paymentMethod === 'boleto') {
-      setShowLoading(true);
-      setTimeout(() => {
-        setShowLoading(false);
-        setShowPendingModal(true);
-        setTimeout(() => {
-          setShowPendingModal(false);
-          navigate('/mybookings');
-        }, 4000);
-      }, 3000);
-      return;
-    }
-    // Cartão, boleto, etc: fluxo normal
     setShowLoading(true);
     try {
       await api.put('/api/v1/bookings/payment', payload);
       setShowLoading(false);
-      setShowRefusedModal(true); // Mostra o modal de recusado mesmo com sucesso
+      if (paymentMethod === 'pix') {
+        setShowQrCodeModal(true);
+        setTimeout(() => {
+          setShowQrCodeModal(false);
+          setShowLoading(true);
+          setTimeout(() => {
+            setShowLoading(false);
+            setShowPixConfirmModal(true);
+            setTimeout(() => {
+              setShowPixConfirmModal(false);
+              navigate('/mybookings');
+            }, 3400);
+          }, 2000);
+        }, 3500);
+      } else if (paymentMethod === 'boleto') {
+        setShowLoading(true);
+        setTimeout(() => {
+          setShowLoading(false);
+          setShowPendingModal(true);
+          setTimeout(() => {
+            setShowPendingModal(false);
+            navigate('/mybookings');
+          }, 4000);
+        }, 3000);
+      } else {
+        setShowRefusedModal(true); // Mostra o modal de recusado mesmo com sucesso
+      }
     } catch (e) {
       setShowLoading(false);
       setShowErrorModal(true);
