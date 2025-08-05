@@ -111,12 +111,10 @@ const SeeDetails = ({ isOpen, onClose, booking, packageInfo }) => {
                                 <h3 className="text-lg font-semibold text-yellow-900 mb-3">Pagamento</h3>
                                 {booking.payment && booking.payment.length > 0 ? (
                                     <div className="space-y-2">
-                                        {booking.payment.map((payment, index) => (
-                                            <div key={index}>
-                                                <span className="font-semibold text-gray-700">Método:</span>
-                                                <p className="text-gray-800">{payment.paymentMethod}</p>
-                                            </div>
-                                        ))}
+                                        <div>
+                                            <span className="font-semibold text-gray-700">Método:</span>
+                                            <p className="text-gray-800">{booking.payment[0].paymentMethod}</p>
+                                        </div>
                                     </div>
                                 ) : (
                                     <p className="text-gray-500">Informações de pagamento não disponíveis</p>
