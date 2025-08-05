@@ -1,6 +1,7 @@
 import { useState } from "react";
 import BookingsContent from "./BookingsContent";
 import RatingsContent from "./RatingsContent";
+import MetricContent from "./MetricContent";
 
 const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
 
@@ -500,13 +501,16 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
     return <BookingsContent packages={packages} />;
   }
   if (title === 'Métricas') {
-    return <div>Conteúdo de Métricas</div>;
+    return <MetricContent />;
   }
   if (title === 'Avaliações') {
     return <RatingsContent />;
   }
   if (title === 'Ajuda') {
     return <div>Conteúdo de Ajuda</div>;
+  }
+  if (title === 'Métricas') {
+    return <MetricContent />;
   }
   return <div>Selecione uma opção do menu</div>;
 }

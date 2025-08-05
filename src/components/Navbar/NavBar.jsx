@@ -7,12 +7,14 @@ const NavBar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState("");
 
   // Busca nome do usuário autenticado
   useEffect(() => {
     async function fetchUser() {
       if (!authToken) {
         setUserName("");
+        setUserRole("");
         setLoading(false);
         return;
       }
@@ -20,8 +22,10 @@ const NavBar = () => {
         setLoading(true);
         const data = await getUserProfile();
         setUserName(`${data.firstName}`.trim());
+        setUserRole(data.role);
       } catch {
         setUserName("");
+        setUserRole("");
       } finally {
         setLoading(false);
       }
@@ -41,61 +45,70 @@ const NavBar = () => {
 
         <nav className="flex items-center gap-6 text-sm text-gray-700 font-semibold">
           <ul className="hidden md:flex items-center gap-6">
-            <li>
-              <a href="#">Pacotes</a>
-            </li>
-            <li>
-              <a href="#">Ofertas</a>
-            </li>
-            {authToken ? (
+            {/* rendediza o texto da navbar de acordo com o tipo de Usuário. Se for diferente de cliente, botão com painel admin */}
+            {userRole && userRole !== "cliente" ? (
               <li>
-                <a href="#">Minhas Reservas</a>
+                <a href="/admin">Painel Administrativo</a>
               </li>
             ) : (
-              <li>
-                <a href="#">Promoções</a>
-              </li>
+              <>
+                <li>
+                  <a href="#">Pacotes</a>
+                </li>
+                <li>
+                  <a href="#">Ofertas</a>
+                </li>
+                {authToken ? (
+                  <li>
+                    <a href="#">Minhas Reservas</a>
+                  </li>
+                ) : (
+                  <li>
+                    <a href="#">Promoções</a>
+                  </li>
+                )}
+              </>
             )}
           </ul>
 
           <div className="flex items-center bg-gray-200 rounded-full px-3 py-1 gap-2">
-        {/* Avatar com iniciais do usuário */}
-        <div
-          className="w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-xs select-none"
-          style={{ minWidth: 24, minHeight: 24 }}
-        >
-          {authToken && userName
-            ? userName.split(" ").map(word => word[0]).join("").toUpperCase().slice(0,2)
-            : <span className="text-gray-200">?</span>}
-        </div>
-        <div className="relative flex items-center">
-          {authToken ? (
-            <>
-              <button
-                className="text-gray-800 hover:text-blue-600 focus:outline-none"
-                onClick={() => setShowDropdown((prev) => !prev)}
-                disabled={loading}
-              >
-                {loading ? "..." : userName}
-              </button>
-              {showDropdown && (
-                <div className="absolute right-0 mt-14 w-20 bg-white border rounded shadow-lg z-50">
+            {/* Avatar com iniciais do usuário */}
+            <div
+              className="w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-xs select-none"
+              style={{ minWidth: 24, minHeight: 24 }}
+            >
+              {authToken && userName
+                ? userName.split(" ").map(word => word[0]).join("").toUpperCase().slice(0, 2)
+                : <span className="text-gray-200">?</span>}
+            </div>
+            <div className="relative flex items-center">
+              {authToken ? (
+                <>
                   <button
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={handleLogout}
+                    className="text-gray-800 hover:text-blue-600 focus:outline-none"
+                    onClick={() => setShowDropdown((prev) => !prev)}
+                    disabled={loading}
                   >
-                    Sair
+                    {loading ? "..." : userName}
                   </button>
-                </div>
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-14 w-20 bg-white border rounded shadow-lg z-50">
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={handleLogout}
+                      >
+                        Sair
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <a href="/login" className="text-gray-800 hover:text-blue-600">
+                  Entrar
+                </a>
               )}
-            </>
-          ) : (
-            <a href="/login" className="text-gray-800 hover:text-blue-600">
-              Entrar
-            </a>
-          )}
-        </div>
-      </div>
+            </div>
+          </div>
         </nav>
       </div>
     </header>
