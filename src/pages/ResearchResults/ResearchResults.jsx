@@ -5,6 +5,7 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from '../../services/api';
 import ImageWithSkeleton from "../../components/ImageWithSkeleton";
+import Accommodations from "../PackageDetails/components/Accommodations";
 
 const ResearchResults = () => {
   const location = useLocation();
@@ -53,6 +54,25 @@ const ResearchResults = () => {
       );
     });
   }
+
+  // Função para reservar um pacote específico
+  const handleReserve = (pkg) => {
+    // Pegue as datas do pacote (ajuste os campos conforme o seu backend)
+    const startTravel = pkg.departureDate || pkg.departure_date;
+    const endTravel = pkg.returnDate || pkg.return_date;
+    console.log("Dados do pacote para reserva:")
+    if (!startTravel || !endTravel) {
+      alert('Não há datas de viagem disponíveis para este pacote.');
+      return;
+    }
+    const payload = {
+      packageID: pkg.id,
+      startTravel,
+      endTravel,
+      // Adicione outros campos necessários aqui
+    };
+    navigate('/package-review', { state: payload });
+  };
   const count = packages.length;
 
   useEffect(() => {
@@ -237,7 +257,7 @@ const ResearchResults = () => {
             <div className="flex gap-3">
               <Link to="/">
               <span>
-              <p className="text-gray-600 text-sm"><i></i>Voltar</p></span>
+              <p className="hover:underline flex text-gray-600 text-sm gap-2">- Voltar</p></span>
               </Link>
             <p className="text-gray-600 text-sm">
               Encontramos <strong>{count}</strong> resultado(s) para você
@@ -306,7 +326,7 @@ const ResearchResults = () => {
                               >
                                 Detalhes
                               </button>
-                              <button className="bg-blue-900 text-white px-4 py-2 text-sm rounded hover:bg-blue-800">
+                              <button onClick={() => handleReserve(pkg)} className="bg-blue-900 text-white px-4 py-2 text-sm rounded hover:bg-blue-800">
                                 Reservar
                               </button>
                             </div>
@@ -355,7 +375,9 @@ const ResearchResults = () => {
                   </div>
                   <div className="flex-1 space-y-2">
                     <h3 className="font-bold text-gray-900 text-lg">
-                      {pkg.title || pkg.destination || "Pacote de viagem"}
+                      {pkg.origin && pkg.destination
+                        ? `${pkg.origin} → ${pkg.destination}`
+                        : (pkg.destination || pkg.title || "Pacote de viagem")}
                     </h3>
                     <p className="text-sm text-yellow-500">{pkg.stars ? "★".repeat(pkg.stars) : "★★★★★"}</p>
                     {/* Preço do pacote */}
@@ -368,27 +390,8 @@ const ResearchResults = () => {
                         : <span className="text-gray-400 font-normal">Preço indisponível</span>
                       }
                     </p>
-                    <p className="text-sm text-gray-700">Acomodações inclusas:</p>
-                    <div className="flex gap-2 items-center">
-                      {/* Miniaturas dos ícones das acomodações inclusas, sem nome */}
-                      {(() => {
-                        // Tenta pegar acomodações de lodgingInfo.accommodations ou pkg.accommodations
-                        const accs = pkg.lodgingInfo?.accommodations || pkg.accommodations || [];
-                        if (Array.isArray(accs) && accs.length > 0) {
-                          return accs.map((acc, idx) => (
-                            acc.iconUrl ? (
-                              <ImageWithSkeleton
-                                key={idx}
-                                src={acc.iconUrl.startsWith('http') ? acc.iconUrl : `https://localhost:8080/${acc.iconUrl}`}
-                                alt="Acomodação"
-                                className="w-6 h-6 object-contain"
-                              />
-                            ) : null
-                          ));
-                        }
-                        return <span className="text-xs text-gray-400">Nenhuma acomodação informada</span>;
-                      })()}
-                    </div>
+                    <p className="text-sm font-semibold mb-4">Acomodações inclusas:</p>
+                    <Accommodations lodgingInfo={pkg.lodgingInfo} showLabels={false} />
                     <div className="flex justify-between items-center pt-2">
                       <button
                         className="text-sm text-blue-700 font-medium hover:underline"
@@ -396,7 +399,10 @@ const ResearchResults = () => {
                       >
                         Detalhes
                       </button>
-                      <button className="bg-blue-900 text-white px-4 py-2 text-sm rounded hover:bg-blue-800">
+                      <button
+                        className="bg-blue-900 text-white px-4 py-2 text-sm rounded hover:bg-blue-800"
+                        onClick={() => handleReserve(pkg)}
+                      >
                         Reservar
                       </button>
                     </div>
