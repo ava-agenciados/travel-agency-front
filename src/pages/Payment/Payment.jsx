@@ -5,6 +5,7 @@ import { useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import NavBar from '../../components/Navbar/NavBar';
 import Footer from '../../components/Footer/Footer';
+import { calculateTotalPrice } from '../../utils/calculateTotalPrice';
 
 const Payment = () => {
 
@@ -23,6 +24,8 @@ const Payment = () => {
       companions = [];
     }
   }
+  const companionsCount = companions.length;
+  const totalPrice = calculateTotalPrice(packageData?.price, companionsCount);
 
   // Referência para acessar a função de confirmação do PaymentMethods
   const paymentMethodsRef = useRef();
@@ -77,7 +80,7 @@ const Payment = () => {
             </div>
 
               {/* Card: Confirma pagamento */}
-              <ConfirmPayment onConfirm={handleConfirm} price={packageData?.price} />
+              <ConfirmPayment onConfirm={handleConfirm} price={totalPrice} companionsCount={companionsCount} />
             </div>
           </div>
 
@@ -113,7 +116,7 @@ const Payment = () => {
             </div>
 
             {/* Card: Confirma pagamento - terceiro no mobile */}
-            <ConfirmPayment onConfirm={handleConfirm} price={packageData?.price} />
+            <ConfirmPayment onConfirm={handleConfirm} price={totalPrice} companionsCount={companionsCount} />
           </div>
         </div>
       </main>

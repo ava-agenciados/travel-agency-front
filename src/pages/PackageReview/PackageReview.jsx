@@ -1,5 +1,6 @@
 // importar o navbar e o footer
 import ConfirmPayment from '../../components/Payment/ConfirmPayment.jsx';
+import { calculateTotalPrice } from '../../utils/calculateTotalPrice';
 import PaymentSteps from '../../components/Payment/PaymentSteps.jsx';
 import PackageDetails from './components/PackageDetails.jsx';
 import ReviewForm from './components/ReviewForm.jsx';
@@ -78,6 +79,7 @@ const PackageReview = () => {
 
   // Adiciona um novo acompanhante
   const handleAddCompanion = () => {
+    if (companions.length >= 2) return;
     setCompanions([
       ...companions,
       { firstName: '', lastName: '', cpfPassport: '', phoneNumber: '', isForeigner: false },
@@ -156,6 +158,11 @@ const PackageReview = () => {
       },
     });
   }
+  console.log(companions);
+
+  // Cálculo do valor total considerando acompanhantes (sem desconto PIX nesta tela)
+  const companionsCount = companions.length;
+  const totalPrice = calculateTotalPrice(packageData?.price, companionsCount);
 
   return (
     <MainLayout>
@@ -185,7 +192,11 @@ const PackageReview = () => {
             handleCompanionChange={handleCompanionChange}
           />
           <MobileOnly className="order-3">
-            <ConfirmPayment onConfirm={handleConfirmPayment} price={packageData?.price} />
+            <ConfirmPayment 
+              onConfirm={handleConfirmPayment} 
+              price={totalPrice}
+              companionsCount={companionsCount}
+            />
           </MobileOnly>
           <DesktopOnly className="flex-col gap-6 w-full lg:w-[350px] order-3">
             <SidebarDetails
@@ -193,6 +204,8 @@ const PackageReview = () => {
               packageData={packageData}
               startTravel={startTravel}
               endTravel={endTravel}
+              companionsCount={companionsCount}
+              totalPrice={totalPrice}
             />
           </DesktopOnly>
         </FormContainer>

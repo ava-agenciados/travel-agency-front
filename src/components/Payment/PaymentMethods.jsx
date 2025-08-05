@@ -1,5 +1,5 @@
 // Importa hooks e componentes necessários do React e do projeto
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getUserProfile } from '../../services/userService';
 import { useNavigate } from 'react-router-dom';
 import CreditCardPaymentFlow from './Flow/CreditCardPaymentFlow';
@@ -9,6 +9,7 @@ import RefusedModal from './Modals/RefusedModal';
 import IconLoading from './Modals/IconLoading';
 
 import { forwardRef, useImperativeHandle } from 'react';
+import { calculateTotalPrice } from '../../utils/calculateTotalPrice';
 import QrCodeModal from './Modals/QrCodeModal';
 import ConfirmModal from './Modals/ConfirmModal';
 import { useAuth } from '../../hooks/useAuth';
@@ -19,6 +20,14 @@ import PendingModal from './Modals/PendingModal';
 const PaymentMethods = forwardRef((props, ref) => {
   // Recebe dados do pacote, acompanhantes e datas via props (primeira linha do corpo do componente)
   const { packageData, startTravel, endTravel, companions } = props;
+  // Estado para o método de pagamento selecionado (declarar antes de qualquer uso)
+  const [paymentMethod, setPaymentMethod] = useState('credit');
+  const companionsCount = Array.isArray(companions) ? companions.length : 0;
+  // Calcula desconto e valor total dinamicamente
+  const discount = paymentMethod === 'pix' ? 5 : 0;
+  const totalPrice = useMemo(() => {
+    return calculateTotalPrice(packageData?.price, companionsCount, paymentMethod);
+  }, [packageData?.price, companionsCount, paymentMethod]);
   // Log para depuração dos acompanhantes recebidos via props (evita ReferenceError)
   useEffect(() => {
     console.log('companions recebidos no PaymentMethods:', companions);
@@ -42,8 +51,6 @@ const PaymentMethods = forwardRef((props, ref) => {
     }
     fetchUser();
   }, []);
-  // Estado para o método de pagamento selecionado
-  const [paymentMethod, setPaymentMethod] = useState('credit');
   // Hook para navegação de rotas
   const navigate = useNavigate();
   // Hook de autenticação
@@ -310,11 +317,11 @@ const PaymentMethods = forwardRef((props, ref) => {
                 <img src="https://img.icons8.com/color/20/000000/amex.png" alt="Amex" className="w-5 h-5 sm:w-6 sm:h-6" />
               </span>
             </label>
-            <button className="bg-yellow-400 text-xs font-bold rounded px-2 py-1 w-fit self-start sm:self-center">12x disponível</button>
+            <button className="bg-yellow-400 text-xs font-bold rounded px-2 py-1 w-fit self-start sm:self-center">12x sem juros</button>
           </div>
           {paymentMethod === 'credit' && (
             <div className="mt-2">
-              <CreditCardPaymentFlow fields={fields} setFields={setFields} packagePrice={packageData?.price} />
+              <CreditCardPaymentFlow fields={fields} setFields={setFields} packagePrice={totalPrice} />
             </div>
           )}
         </div>
@@ -330,7 +337,7 @@ const PaymentMethods = forwardRef((props, ref) => {
             />
             <span className="text-sm sm:text-base">Pix</span>
           </label>
-          <button className="bg-yellow-400 text-xs font-bold rounded px-2 py-1 w-fit self-start sm:self-center">5% Desconto</button>
+          {/* <button className="bg-yellow-400 text-xs font-bold rounded px-2 py-1 w-fit self-start sm:self-center"></button> */}
         </div>
         {/* Opção de Boleto */}
         <div className={`border rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${paymentMethod === 'boleto' ? 'border-blue-600 bg-blue-50' : ''}`}>
@@ -344,7 +351,7 @@ const PaymentMethods = forwardRef((props, ref) => {
             />
             <span className="text-sm sm:text-base">Boleto</span>
           </label>
-          <button className="bg-yellow-400 text-xs font-bold rounded px-2 py-1 w-fit self-start sm:self-center">15x disponível</button>
+          {/* <button className="bg-yellow-400 text-xs font-bold rounded px-2 py-1 w-fit self-start sm:self-center">15x disponível</button> */}
         </div>
       </div>
       {/* Modais globais para cartão de crédito */}
@@ -377,7 +384,8 @@ const PaymentMethods = forwardRef((props, ref) => {
       {showQrCodeModal && <QrCodeModal onClose={() => setShowQrCodeModal(false)} />}
       {showPixConfirmModal && <ConfirmModal onClose={() => setShowPixConfirmModal(false)} />}
       {showRefusedModal && <RefusedModal onClose={() => setShowRefusedModal(false)} />}
-      {/* ConfirmPayment removido daqui, pois já é renderizado fora deste componente */}
+      {/* Card de resumo do pagamento (mobile e desktop) */}
+      {/* O card de resumo deve aparecer apenas uma vez, removendo duplicidade no mobile */}
     </div>
   );
 });

@@ -9,8 +9,8 @@ import IconCorret from './images/Icons/IconCorret.png'
 import IconPending from './images/Icons/IconPending.png'
 import IconRefuse from './images/Icons/Refused.png'
 import IconQrCode from './images/Icons/IconQrCode.png'
-// Objeto que centraliza todas as imagens da aplicação
-// Facilita a importação e gerenciamento de assets
+import IconPeople from './images/Icons/people.png'
+
 const Images = {
     Bg_HeroSection,      // Fundo da seção hero
     PalmTree,           // Decoração com palmeira
@@ -21,7 +21,8 @@ const Images = {
     IconCorret,        // Ícone de status de pagamento confirmado
     IconPending,       // Ícone de status de pagamento pendente
     IconRefuse,         // Ícone de status de pagamento recusado
-    IconQrCode          // Icone de QrCode para método de pagamento como pix
+    IconQrCode,       // Icone de QrCode para método de pagamento como pix
+    IconPeople
 };
 
 // Exporta o objeto Images como padrão para uso em outros componentes
