@@ -5,7 +5,8 @@ const CardModel = ({
     returnDate, 
     guests, 
     bookingId,
-    rating = 4.5,
+    rating,
+    status,
     onDetailsClick 
 }) => {
     // Função para renderizar estrelas
@@ -34,6 +35,21 @@ const CardModel = ({
         }
         
         return stars;
+    };
+
+    // Função para determinar a cor do status
+    const getStatusColor = (status) => {
+        if (!status) return 'text-gray-500';
+        
+        const statusLower = status.toLowerCase();
+        if (statusLower.includes('aprovado') || statusLower.includes('concluído')) {
+            return 'text-green-600';
+        } else if (statusLower.includes('recusado') || statusLower.includes('cancelado')) {
+            return 'text-red-600';
+        } else if (statusLower.includes('pendente')) {
+            return 'text-orange-400';
+        }
+        return 'text-gray-500';
     };
 
     return (
@@ -88,6 +104,16 @@ const CardModel = ({
                                 <span className="text-sm text-gray-600 ml-1">({rating})</span>
                             </div>
                         </div>
+
+                        {/* Campo de status */}
+                        {status && (
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-gray-600">Status:</span>
+                                <span className={`text-sm font-semibold ${getStatusColor(status)}`}>
+                                    {status}
+                                </span>
+                            </div>
+                        )}
                     </div>
                     
                     {/* Botão de detalhes no canto inferior direito */}

@@ -49,7 +49,7 @@ const NavBar = () => {
             </li>
             {authToken ? (
               <li>
-                <a href="#">Minhas Reservas</a>
+                <a href="/mybookings">Minhas Reservas</a>
               </li>
             ) : (
               <li>

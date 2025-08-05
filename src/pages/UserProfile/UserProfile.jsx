@@ -1,6 +1,8 @@
 import NavBar from "../../components/Navbar/NavBar";
 import Footer from "../../components/Footer/Footer";
-import UserData from "../../components/UserProfile/UserData";
+import { useState, useEffect } from "react";
+import { getUserProfile } from "../../services/userService";
+import UserData from "./Components/UserData";
 
 const UserProfile= () =>
 {
