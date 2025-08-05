@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { getUserProfile } from "../../../services/userService";
 
 const UserData = () => {
-    const [showPassword, setShowPassword] = useState(false);
     const [userPhoto, setUserPhoto] = useState(null); // Estado para a foto do usuário
     const [isEditing, setIsEditing] = useState(false); // Estado para modo de edição
     
@@ -68,9 +67,6 @@ const UserData = () => {
         setIsEditing(!isEditing);
     };
 
-    const togglePassword = () => {
-        setShowPassword(!showPassword);
-    };
   if (loading) {
     return <div className="text-center py-8">Carregando dados do usuário...</div>;
   }
@@ -132,12 +128,12 @@ const UserData = () => {
                             </div>
                             <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                                 <span className="p-1 sm:p-2 font-semibold text-gray-500 text-sm sm:text-base">Senha:</span>
-                                <span 
-                                    className="p-1 sm:p-2 font-semibold text-[#223A5F] cursor-pointer hover:underline select-none text-sm sm:text-base"
-                                    onClick={togglePassword}
+                                <button 
+                                    className="p-1 sm:p-2 font-semibold text-blue-600 hover:text-blue-800 cursor-pointer hover:underline text-sm sm:text-base text-left"
+                                    onClick={() => window.location.href = 'http://localhost:3000/password-recovery'}
                                 >
-                                    {showPassword ? "minhasenha123" : "Visualizar Senha"}
-                                </span>
+                                    Redefinir Senha
+                                </button>
                             </div>
                         </div>
                     </div>

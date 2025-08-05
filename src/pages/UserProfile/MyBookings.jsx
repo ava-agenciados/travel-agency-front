@@ -44,7 +44,14 @@ const MyBookings = () => {
                 setPackageData(packageDataMap);
                 setError(null);
             } catch (err) {
-                setError('Erro ao carregar as reservas: ' + err.message);
+                // Verifica se é erro 404 ou se a mensagem indica que não há reservas
+                if (err.status === 404 || err.response?.status === 404 || 
+                    err.message?.includes('Não foi possível obter as reservas do usuário')) {
+                    setError('404');
+                    setBookings([]); // Define um array vazio para não mostrar erro técnico
+                } else {
+                    setError('Erro ao carregar as reservas: ' + err.message);
+                }
                 console.error('Erro ao buscar reservas:', err);
             } finally {
                 setLoading(false);
@@ -164,7 +171,7 @@ const MyBookings = () => {
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            Pacotes Ativos
+                            Reservas Ativos
                         </button>
                         <button
                             onClick={() => setActiveTab('active')}
@@ -174,7 +181,7 @@ const MyBookings = () => {
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            Histórico de Pacotes
+                            Histórico de Reservas
                         </button>
                     </div>
 
@@ -190,7 +197,7 @@ const MyBookings = () => {
                     <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 lg:p-8 my-2 sm:my-4">
 
                     <h2 className="text-base sm:text-lg md:text-xl font-bold text-blue-900 mb-3 sm:mb-4">
-                        {activeTab === 'history' ? 'Pacotes Ativos' : 'Histórico de Pacotes'}
+                        {activeTab === 'history' ? 'Reservas Ativas' : 'Histórico de Reservas'}
                     </h2>
 
                     {/* Conteúdo das reservas */}
@@ -200,8 +207,19 @@ const MyBookings = () => {
                                 <p className="text-sm sm:text-base">Carregando reservas...</p>
                             </div>
                         ) : error ? (
-                            <div className="text-center text-red-500 py-6 sm:py-8">
-                                <p className="text-sm sm:text-base">{error}</p>
+                            <div className="text-center py-6 sm:py-8">
+                                <p className="text-sm sm:text-base">
+                                    {error === '404' ? (
+                                        <span className="text-gray-500">
+                                            {activeTab === 'history' 
+                                                ? 'Nenhuma reserva ativa encontrada.' 
+                                                : 'Nenhuma reserva encontrada no histórico.'
+                                            }
+                                        </span>
+                                    ) : (
+                                        <span className="text-red-500">{error}</span>
+                                    )}
+                                </p>
                             </div>
                         ) : filteredBookings.length === 0 ? (
                             <div className="text-center text-gray-500 py-6 sm:py-8">
