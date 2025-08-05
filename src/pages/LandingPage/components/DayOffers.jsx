@@ -38,7 +38,7 @@ const DayOffers = () => {
                 <h2 className="text-xl font-bold mb-1">OFERTAS DO DIA</h2>
                 <p className="text-[0.5rem] mb-4">ATÉ O ESTOQUE DAS RESERVAS ACABAREM</p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 place-items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 place-items-center">
                   {offers.length === 0 ? (
                     <span className="col-span-full text-gray-400 text-center py-8">Nenhuma oferta disponível no momento.</span>
                   ) : (

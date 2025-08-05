@@ -1,7 +1,11 @@
 
-const MapsDetails = ({ zipcode }) => {
+const MapsDetails = ({ street, number, neighborhood, city, state, country, zipCode }) => {
   const API_KEY = import.meta.env.VITE_API_KEY;
-  const mapaSrc = `https://www.google.com/maps/embed/v1/search?key=${API_KEY}&q=${encodeURIComponent(zipcode)}`;
+  const addressParts = [street, number, neighborhood, city, state, country, zipCode].filter(Boolean);
+  const address = addressParts.join(', ');
+  const formattedAddress = encodeURIComponent(address);
+  const mapaSrc = `https://www.google.com/maps/embed/v1/place?key=${API_KEY}&q=${formattedAddress}`;
+  // console.log("url mapa:", mapaSrc);
   return (
     <section>
       <div className="max-w-9xl mx-auto py-8">
@@ -12,8 +16,9 @@ const MapsDetails = ({ zipcode }) => {
             width="100%"
             height="600"
             style={{ border: 0 }}
-            allowFullScreen=""
+            allowFullScreen
             loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
           ></iframe>
         </div>
       </div>

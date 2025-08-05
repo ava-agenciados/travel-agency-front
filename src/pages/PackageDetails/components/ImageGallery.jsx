@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import ImageWithSkeleton from '../../../components/ImageWithSkeleton';
 import { Dialog } from '@headlessui/react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { FaPlus } from 'react-icons/fa';
 
 export default function ImageGallery({ images }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,51 +17,53 @@ export default function ImageGallery({ images }) {
 
   return (
     <>
-      <div className="bg-gray-100 grid grid-cols-4 gap-2 max-w-9xl mx-auto h-[400px] rounded-lg overflow-hidden shadow-lg relative my-10">
+      <div className="bg-gray-100 grid grid-cols-2 gap-2 sm:grid-cols-4 max-w-9xl mx-auto h-[400px] rounded-lg overflow-hidden shadow-lg relative my-10">
         <div
           className="col-span-2 row-span-2 cursor-pointer"
           onClick={() => openModal(0)}
         >
-          <img
-            src={images[1]}
+          <ImageWithSkeleton
+            src={images[0]}
             alt="Imagem 1"
-            className="w-full h-full object-cover"
+            className="w-full h-full"
+            imgStyle={{ objectFit: 'cover', width: '100%', height: '100%' }}
           />
         </div>
         <div
           className="col-span-1 row-span-2 cursor-pointer"
           onClick={() => openModal(1)}
         >
-          <img
-            src={images[2]}
+          <ImageWithSkeleton
+            src={images[1]}
             alt="Imagem 2"
-            className="w-full h-full object-cover"
+            className="w-full h-full"
+            imgStyle={{ objectFit: 'cover', width: '100%', height: '100%' }}
           />
         </div>
         <div
           className="col-span-1 row-span-1 cursor-pointer"
           onClick={() => openModal(2)}
         >
-          <img
-            src={images[3]}
+          <ImageWithSkeleton
+            src={images[2]}
             alt="Imagem 3"
-            className="w-full h-full object-cover"
+            className="w-full h-full"
+            imgStyle={{ objectFit: 'cover', width: '100%', height: '100%' }}
           />
         </div>
         <div
           className="col-span-1 row-span-1 cursor-pointer relative"
           onClick={() => openModal(3)}
         >
-          <img
-            src={images[4]}
+          <ImageWithSkeleton
+            src={images[3]}
             alt="Imagem 4"
-            className="w-full h-full object-cover"
+            className="w-full h-full"
+            imgStyle={{ objectFit: 'cover', width: '100%', height: '100%' }}
           />
-          {images.length > 5 && (
+          {images.length > 4 && (
             <div className="absolute inset-0 bg-black/60 text-white flex items-center justify-center text-xl font-semibold ">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 mr-1">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
+              <FaPlus className="mr-1" />
               {images.length - 4}
             </div>
           )}
@@ -81,10 +85,11 @@ export default function ImageGallery({ images }) {
               <ChevronLeft size={32} />
             </button>
           )}
-          <img
+          <ImageWithSkeleton
             src={images[currentIndex]}
             alt={`Imagem ${currentIndex + 1}`}
-            className="max-h-[90vh] max-w-[90vw] object-contain"
+            className="max-h-[90vh] max-w-[90vw]"
+            imgStyle={{ objectFit: 'contain', width: '100%', height: '100%' }}
           />
           {images.length > 1 && (
             <button

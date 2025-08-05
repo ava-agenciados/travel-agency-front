@@ -1,27 +1,33 @@
 // components/ImageGallery.jsx
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import NavBar from '../../components/Navbar/NavBar';
 import Footer from '../../components/Footer/Footer';
 import MapsDetails from './components/MapsDetails';
 import ImageGallery from './components/ImageGallery';
-// import PackageSummary from './components/PackageSummary';
 import PackageMainInfo from './components/PackageMainInfo';
 import Accommodations from './components/Accommodations';
 import AuthorInfo from './components/AuthorInfo';
 import RatingsList from './components/RatingsList';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import { formatPrice } from '../../utils/formatPrice';
-import { useNavigate } from 'react-router-dom';
 
 export default function PackageDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [packageData, setPackageData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lodgingInfo, setLodgingInfo] = useState(null);
   const [zipCode, setZipCode] = useState('');
+  const [street, setStreet] = useState('');
+  const [number, setNumber] = useState('');
+  const [neighborhood, setNeighborhood] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [country, setCountry] = useState('');
 
+  // Função para garantir formato yyyy-MM-dd
   function formatDate(dateStr) {
     if (!dateStr) return '';
     // Se vier no formato dd/MM/yyyy, converte para yyyy-MM-dd
@@ -29,7 +35,6 @@ export default function PackageDetails() {
       const [day, month, year] = dateStr.split('/');
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
-    // Tenta converter normalmente
     const d = new Date(dateStr);
     if (isNaN(d)) return '';
     return d.toISOString().slice(0, 10);
@@ -45,9 +50,8 @@ export default function PackageDetails() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Função para reservar
-  const navigate = useNavigate();
   const handleReserve = async () => {
-    if (!startTravel || !endTravel || null) {
+    if (!startTravel || !endTravel) {
       alert('Não há datas de viagem disponíveis para este pacote.');
       return;
     }
@@ -58,8 +62,8 @@ export default function PackageDetails() {
         startTravel,
         endTravel,
       };
+      // redirecionar para tela de package-review
       navigate('/package-review', { state: payload });
-
     } catch (error) {
       alert('Erro ao realizar reserva.');
     } finally {
@@ -94,14 +98,38 @@ export default function PackageDetails() {
         if (found && found.lodgingInfo) {
           setLodgingInfo(found.lodgingInfo);
           const rawZip = found.lodgingInfo.location?.zipCode || '';
+          const rawStreet = found.lodgingInfo.location?.street || '';
+          const rawNumber = found.lodgingInfo.location?.number || '';
+          const rawNeighborhood = found.lodgingInfo.location?.neighborhood || '';
+          const rawCity = found.lodgingInfo.location?.city || '';
+          const rawState = found.lodgingInfo.location?.state || '';
+          const rawCountry = found.lodgingInfo.location?.country || '';
           setZipCode(rawZip.replace(/\D/g, ''));
+          setStreet(rawStreet.replace(/\D/g, ''));
+          setNumber(rawNumber.replace(/\D/g, ''));
+          setNeighborhood(rawNeighborhood.replace(/\D/g, ''));
+          setCity(rawCity.replace(/\D/g, ''));
+          setState(rawState.replace(/\D/g, ''));
+          setCountry(rawCountry.replace(/\D/g, ''));
         } else {
           setLodgingInfo(null);
           setZipCode('');
+          setStreet('');
+          setNumber('');
+          setNeighborhood('');
+          setCity('');
+          setState('');
+          setCountry('');
         }
       } catch (e) {
         setLodgingInfo(null);
         setZipCode('');
+        setStreet('');
+        setNumber('');
+        setNeighborhood('');
+        setCity('');
+        setState('');
+        setCountry('');
       }
     }
     
@@ -110,7 +138,19 @@ export default function PackageDetails() {
     } else {
       setLodgingInfo(packageData.lodgingInfo);
       const rawZip = packageData.lodgingInfo.location?.zipCode || '';
+      const rawStreet = found.lodgingInfo.location?.street || '';
+      const rawNumber = found.lodgingInfo.location?.number || '';
+      const rawNeighborhood = found.lodgingInfo.location?.neighborhood || '';
+      const rawCity = found.lodgingInfo.location?.city || '';
+      const rawState = found.lodgingInfo.location?.state || '';
+      const rawCountry = found.lodgingInfo.location?.country || '';
       setZipCode(rawZip.replace(/\D/g, ''));
+      setStreet(rawStreet.replace(/\D/g, ''));
+      setNumber(rawNumber.replace(/\D/g, ''));
+      setNeighborhood(rawNeighborhood.replace(/\D/g, ''));
+      setCity(rawCity.replace(/\D/g, ''));
+      setState(rawState.replace(/\D/g, ''));
+      setCountry(rawCountry.replace(/\D/g, ''));
     }
   }, [id, packageData]);
 
@@ -160,7 +200,7 @@ export default function PackageDetails() {
           <div className="bg-white rounded-lg shadow-md p-6 space-y-6 h-fit">
             <h4 className="text-sm font-semibold text-gray-700">Resumo</h4>
             <div className="flex flex-col gap-2">
-              <h2>Data de Início da viagem</h2>
+              <h2>Início da viagem</h2>
               <input
                 type="date"
                 className="border rounded px-3 py-2 text-sm bg-gray-100"
@@ -169,7 +209,7 @@ export default function PackageDetails() {
                 disabled
                 placeholder="Início da viagem"
               />
-              <h2>Data de Fim da viagem</h2>
+              <h2>Fim da viagem</h2>
               <input
                 type="date"
                 className="border rounded px-3 py-2 text-sm bg-gray-100"
@@ -182,7 +222,7 @@ export default function PackageDetails() {
             <div>
               {/* Preço do pacote: valor original cortado e valor promocional */}
               {packageData.price ? (
-                <p className="text-lg font-bold text-gray-800">
+                <p className="text-lg font-bold text-green-700">
                   {packageData.discountPercent && packageData.discountPercent > 0 ? (
                     <>
                       <span className="line-through text-gray-400 mr-2">R$ {(Number(packageData.price) * 1.2).toLocaleString('pt-BR')}</span>
@@ -210,7 +250,7 @@ export default function PackageDetails() {
           </div>
         </div>
       </section>
-      <MapsDetails zipcode={zipCode} />
+      <MapsDetails zipCode={zipCode} number={number} neighborhood={neighborhood} city={city} state={state} country={country}/>
       <Footer />
     </>
   );

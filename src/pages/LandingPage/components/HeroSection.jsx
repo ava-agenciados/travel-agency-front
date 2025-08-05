@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import LoadingOverlay from "../../../components/LoadingOverlay";
+import Skeleton from "../../../components/Skeleton";
 import api from "../../../services/api";
-import CategoryScroll from "../components/CategoryScroll/CategoryScroll";
 import Images from "../../../assets/image";
 import { useNavigate } from "react-router-dom";
 
@@ -17,9 +17,9 @@ const HeroSection = () => {
     localStorage.setItem('cookieAccepted', 'true');
     setShowCookie(false);
   }
- const [selectedIdx, setSelectedIdx] = useState(null);
  const [isOverflowing, setIsOverflowing] = useState(false);
  const scrollRef = useRef(null);
+ const [checkedDateFlex, setCheckedDateFlex] = useState(false);
  const [startDate, setStartDate] = useState("");
  const [endDate, setEndDate] = useState("");
  const navigate = useNavigate();
@@ -46,19 +46,6 @@ function formatDateToAPI(dateStr) {
 
 const todayStr = formatDateToInput(new Date());
 
- const category = [
- "Hospedagens",
- "Passagens",
- "Carros",
- "Pacotes",
- "Atividades",
- "Cruzeiros",
- "Seguros",
- "Ofertas",
- "Destinos",
- "Blog",
- ];
-
  useEffect(() => {
  const checkOverflow = () => {
  if (scrollRef.current) {
@@ -75,7 +62,7 @@ const todayStr = formatDateToInput(new Date());
  window.removeEventListener("resize", checkOverflow);
  };
  }, []);
-
+//  Funçao pra mudar o params do envio da requisição
  const handleSearch = async () => {
     if (!origin || !destination || !startDate || !endDate) {
       alert("Preencha todos os campos.");
@@ -87,17 +74,41 @@ const todayStr = formatDateToInput(new Date());
       const departureFormated = formatDateToAPI(startDate);
       const returnFormated = formatDateToAPI(endDate);
 
-      const response = await api.get("/api/v1/packages/search", {
-        params: {
+      let searchParams;
+      if (checkedDateFlex) {
+        searchParams = {
           origin,
           destination,
           departureDate: departureFormated,
           returnDate: returnFormated,
-        },
+        };
+        console.log("teste envio flexivel", searchParams);
+      } else {
+        searchParams = {
+          origin,
+          destination,
+          departureDate: departureFormated,
+          returnDate: returnFormated,
+        };
+        console.log("teste envio normal", searchParams);
+      }
+
+      const response = await api.get("/api/v1/packages/search", {
+        params: searchParams,
       });
-      const packages = Array.isArray(response.data) ? response.data : [];
+      let packages = Array.isArray(response.data) ? response.data : [];
+      // Filtro pra checar se a data flexivel
+      if (!checkedDateFlex) {
+        packages = packages.filter(pkg => {
+          const pkgDeparture = pkg.departureDate || pkg.departure_date;
+          const pkgReturn = pkg.returnDate || pkg.return_date;
+          return (
+            pkgDeparture === departureFormated &&
+            pkgReturn === returnFormated
+          );
+        });
+      }
       const count = packages.length;
-      // setResultados(packages); // Removido: não existe setResultados neste escopo
       navigate("/research-results", {
         state: {
           packages,
@@ -106,6 +117,7 @@ const todayStr = formatDateToInput(new Date());
           destination,
           startDate,
           endDate,
+          checkedDateFlex,
         },
       });
       // console.log("Resultados:", response.data);
@@ -119,6 +131,7 @@ const todayStr = formatDateToInput(new Date());
           destination,
           startDate,
           endDate,
+          checkedDateFlex,
         },
       });
     } finally {
@@ -148,11 +161,7 @@ const todayStr = formatDateToInput(new Date());
  ref={scrollRef}
  className="w-full overflow-x-auto scrollbar-hiden scroll-smooth"
  >
- {/* <CategoryScroll
- category={category}
- selectedIdx={selectedIdx}
- setSelectedIdx={setSelectedIdx}
- /> */}
+
  </div>
  </div>
  </div>
@@ -169,88 +178,121 @@ const todayStr = formatDateToInput(new Date());
  </div>
 
  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
- <div className="flex flex-col">
- <label className="text-sm text-gray-600 mb-1">
- Onde você está?
- </label>
- <input
- type="text"
- name="origin"
- placeholder="Ex: Recife"
- className="px-4 py-2 border rounded-md w-full text-sm"
- value={origin}
- onChange={(e) => setOrigin(e.target.value)}
- />
 
- </div>
- <div className="flex flex-col">
- <label className="text-sm text-gray-600 mb-1">
- Para onde você vai?
- </label>
- <input
- type="text"
- name="destination"
- placeholder="Ex: Rio de Janeiro"
- className="px-4 py-2 border rounded-md w-full text-sm"
- value={destination}
- onChange={(e) => setDestination(e.target.value)}
- />
- </div>
-
- <div className="flex flex-col">
- <label className="text-sm text-gray-600 mb-1">
- Escolha as datas
- </label>
- <div className="grid grid-cols-2 gap-2">
- <input
-   type="date"
-   name="departureDate"
-   className="px-3 py-2 border rounded-md text-sm w-full"
-   min={todayStr}
-   aria-label="Data de ida"
-   value={startDate}
-   onChange={(e) => {
-     setStartDate(e.target.value);
-     if (endDate && e.target.value > endDate) {
-       setEndDate("");
-     }
-   }}
-   placeholder="Check-in"
- />
-
- <input
-   type="date"
-   name="returnDate"
-   className="px-3 py-2 border rounded-md text-sm w-full"
-   aria-label="Data de volta"
-   value={endDate}
-   min={startDate || todayStr}
-   onChange={(e) => setEndDate(e.target.value)}
-   placeholder="Check-out"
-   disabled={!startDate}
- />
- </div>
- </div>
- <div className="flex flex-col items-center justify-center">
-
- <button onClick={handleSearch} className="bg-[#1877F2] text-white p-2 rounded-md shadow-md hover:bg-[#165ecb] transition">
- <svg
- xmlns="http://www.w3.org/2000/svg"
- className="h-5 w-5"
- fill="none"
- viewBox="0 0 24 24"
- stroke="currentColor"
- >
- <path
- strokeLinecap="round"
- strokeLinejoin="round"
- strokeWidth={2}
- d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
- />
- </svg>
- </button>
- </div>
-
+   {loading ? (
+     <>
+       <div className="flex flex-col">
+         <Skeleton width="80%" height="16px" className="mb-2" />
+         <Skeleton width="100%" height="40px" />
+       </div>
+       <div className="flex flex-col">
+         <Skeleton width="80%" height="16px" className="mb-2" />
+         <Skeleton width="100%" height="40px" />
+       </div>
+       <div className="flex flex-col">
+         <Skeleton width="80%" height="16px" className="mb-2" />
+         <div className="grid grid-cols-2 gap-2">
+           <Skeleton width="100%" height="40px" />
+           <Skeleton width="100%" height="40px" />
+         </div>
+       </div>
+       <div className="flex flex-col items-center justify-center">
+         <Skeleton width="48px" height="48px" circle />
+       </div>
+     </>
+   ) : (
+     <>
+       <div className="flex flex-col">
+         <label className="text-sm text-gray-600 mb-1">
+           Onde você está?
+         </label>
+         <input
+           type="text"
+           name="origin"
+           placeholder="Ex: Recife"
+           className="px-4 py-2 border rounded-md w-full text-sm"
+           value={origin}
+           onChange={(e) => setOrigin(e.target.value)}
+         />
+       </div>
+       <div className="flex flex-col">
+         <label className="text-sm text-gray-600 mb-1">
+           Para onde você vai?
+         </label>
+         <input
+           type="text"
+           name="destination"
+           placeholder="Ex: Rio de Janeiro"
+           className="px-4 py-2 border rounded-md w-full text-sm"
+           value={destination}
+           onChange={(e) => setDestination(e.target.value)}
+         />
+       </div>
+       <div className="flex flex-col">
+         <label className="text-sm text-gray-600 mb-1">
+           Escolha as datas
+         </label>
+         <div className="grid grid-cols-2 gap-2">
+           <input
+             type="date"
+             name="departureDate"
+             className="px-3 py-2 border rounded-md text-sm w-full"
+             min={todayStr}
+             aria-label="Data de ida"
+             value={startDate}
+             onChange={(e) => {
+               setStartDate(e.target.value);
+               if (endDate && e.target.value > endDate) {
+                 setEndDate("");
+               }
+             }}
+             placeholder="Check-in"
+           />
+           <input
+             type="date"
+             name="returnDate"
+             className="px-3 py-2 border rounded-md text-sm w-full"
+             aria-label="Data de volta"
+             value={endDate}
+             min={startDate || todayStr}
+             onChange={(e) => setEndDate(e.target.value)}
+             placeholder="Check-out"
+             disabled={!startDate}
+           />
+         </div>
+       </div>
+       <div className="flex flex-col items-center justify-center">
+         <button onClick={handleSearch} className="bg-[#1877F2] text-white p-2 rounded-md shadow-md hover:bg-[#165ecb] transition">
+           <svg
+             xmlns="http://www.w3.org/2000/svg"
+             className="h-5 w-5"
+             fill="none"
+             viewBox="0 0 24 24"
+             stroke="currentColor"
+           >
+             <path
+               strokeLinecap="round"
+               strokeLinejoin="round"
+               strokeWidth={2}
+               d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
+             />
+           </svg>
+         </button>
+       </div>
+       <div className="col-span-full flex items-center mb-2">
+     <input
+       type="checkbox"
+       id="dateFlex"
+       checked={checkedDateFlex}
+       onChange={e => setCheckedDateFlex(e.target.checked)}
+       className="mr-2 accent-blue-600"
+     />
+     <label htmlFor="dateFlex" className="text-sm text-gray-700 select-none cursor-pointer">
+       Buscar com datas flexíveis (encontrar pacotes entre as datas escolhidas)
+     </label>
+       </div>
+     </>
+   )}
  </div>
  </div>
 

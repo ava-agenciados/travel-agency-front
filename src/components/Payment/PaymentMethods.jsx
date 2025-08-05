@@ -142,21 +142,10 @@ const PaymentMethods = forwardRef((props, ref) => {
       cpfPassport: normalizeCPF(responsible?.cpfPassport || responsible?.CPFPassport),
       phoneNumber: normalizePhone(responsible?.phoneNumber || responsible?.PhoneNumber),
     };
-    // Log para depuração dos dados do responsável
-    console.log('responsible:', responsible);
-    // Função para validar se um acompanhante tem todos os campos obrigatórios preenchidos
-    function isValidCompanion(c) {
-      return (
-        c &&
-        c.firstName && c.lastName &&
-        c.cpfPassport && c.phoneNumber
-      );
-    }
 
-    // ...
 
     // Validação dos campos do responsável
-    // Validação dos campos do responsável (CPFPassport: 11 dígitos, PhoneNumber: formato internacional)
+
     if (!normalizedResponsible.cpfPassport || normalizedResponsible.cpfPassport.length < 11) {
       setErrorMessage('CPF/Passaporte do responsável está vazio ou inválido.');
       setShowErrorModal(true);
@@ -185,30 +174,22 @@ const PaymentMethods = forwardRef((props, ref) => {
       return;
     }
 
-    // Monta o objeto de método de pagamento
-    // Função auxiliar para converter data ISO para dd/MM/yyyy
-    function formatDateBR(dateStr) {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      return `${day}/${month}/${year}`;
-    }
 
-    // Função auxiliar para converter data para dd/MM/yyyy
-    function toDDMMYYYY(date) {
-      if (!date) return '';
-      const d = new Date(date);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      return `${day}/${month}/${year}`;
+
+   // CRIAR FUNÇÃO QUE PEGA A DATA E COLOCA BARRAS NO FORMATO DD/MM/YYYY
+    function formatarData(data) {
+      if (!data) return '';
+      // Garante que a data seja tratada como local, evitando diminuir um dia por conta do fuso
+      const d = typeof data === 'string' ? new Date(data + 'T00:00:00') : new Date(data);
+      const dia = String(d.getDate()).padStart(2, '0');
+      const mes = String(d.getMonth() + 1).padStart(2, '0'); // Mês começa do zero
+      const ano = d.getFullYear();
+      return `${dia}/${mes}/${ano}`;
     }
 
     let paymentMethodObj = {
       paymentMethod: paymentMethodValue,
-      paymentDate: toDDMMYYYY(new Date()),
+      paymentDate: formatarData(new Date()),
       cpfPassport: normalizedResponsible.cpfPassport || '',
       phoneNumber: normalizedResponsible.phoneNumber || '',
       // Só inclui transactionId se houver valor válido (GUID), senão omite
@@ -232,31 +213,11 @@ const PaymentMethods = forwardRef((props, ref) => {
       };
     }
 
-    // Função auxiliar para converter data ISO para dd/MM/yyyy
-    function formatDateBR(dateStr) {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      return `${day}/${month}/${year}`;
-    }
-
-    // Função para converter data ISO para dd/MM/yyyy
-    function toDDMMYYYY(date) {
-      if (!date) return '';
-      const d = new Date(date);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      return `${day}/${month}/${year}`;
-    }
-
     // Monta o payload para enviar à API
     const payload = {
       packageID: packageData?.id,
-      startTravel: toDDMMYYYY(startTravel),
-      endTravel: toDDMMYYYY(endTravel),
+      startTravel: formatarData(startTravel),
+      endTravel: formatarData(endTravel),
       companions: validCompanions,
       paymentMethods: [
         paymentMethodObj
