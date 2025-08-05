@@ -42,14 +42,14 @@ const NavBar = () => {
         <nav className="flex items-center gap-6 text-sm text-gray-700 font-semibold">
           <ul className="hidden md:flex items-center gap-6">
             <li>
-              <a href="#">Pacotes</a>
+              <a href="/">Pacotes</a>
             </li>
             <li>
-              <a href="#">Ofertas</a>
+              <a href="/">Ofertas</a>
             </li>
             {authToken ? (
               <li>
-                <a href="#">Minhas Reservas</a>
+                <a href="/mybookings">Minhas Reservas</a>
               </li>
             ) : (
               <li>
@@ -79,7 +79,13 @@ const NavBar = () => {
                 {loading ? "..." : userName}
               </button>
               {showDropdown && (
-                <div className="absolute right-0 mt-14 w-20 bg-white border rounded shadow-lg z-50">
+                <div className="absolute right-0 mt-24 w-20 bg-white border rounded shadow-lg z-50">
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => window.location.href = "/userdata"}
+                  >
+                    Perfil
+                  </button>
                   <button
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={handleLogout}

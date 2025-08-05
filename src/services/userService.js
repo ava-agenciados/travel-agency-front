@@ -30,3 +30,30 @@ export async function getUserProfile() {
   // Retorna o JSON com os dados do usuário
   return await response.json()
 }
+
+/**
+ * Obtém todas as reservas do usuário autenticado da API
+ * @returns {Promise<Array>} Lista de reservas do usuário
+ */
+export async function getUserBookings() {
+  // Obtém o token JWT salvo pelo authService
+  const token = authService.getToken()
+  if (!token) throw new Error('Usuário não autenticado')
+
+  // Faz a requisição autenticada para o endpoint de reservas
+  const response = await fetch('https://localhost:8080/api/v1/bookings', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': '*/*',
+    },
+  })
+
+  // Se não autorizado, lança erro
+  if (!response.ok) {
+    throw new Error('Não foi possível obter as reservas do usuário')
+  }
+
+  // Retorna o JSON com a lista de reservas
+  return await response.json()
+}

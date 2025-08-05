@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getUserProfile } from "../../services/userService";
+import { getUserProfile } from "../../../services/userService";
 
 const UserData = () => {
     const [showPassword, setShowPassword] = useState(false);
