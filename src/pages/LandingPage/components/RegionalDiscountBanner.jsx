@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import ImageWithSkeleton from '../../../components/ImageWithSkeleton';
 import { useNavigate } from 'react-router-dom';
 import api from '../../../services/api';
 
@@ -64,7 +65,7 @@ const RegionalDiscountBanner = () => {
             state: {
                 packages: pkgs,
                 count: pkgs.length,
-                filter: state,
+                stateFilter: state,
             },
         });
     }
@@ -87,10 +88,11 @@ const RegionalDiscountBanner = () => {
                     ) : (
                         regionOffers.map((destino, idx) => (
                             <div key={idx} className="relative rounded-xl overflow-hidden shadow-md group">
-                                <img
+                                <ImageWithSkeleton
                                     src={destino.img}
                                     alt={destino.name}
-                                    className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                                    className="w-full h-40"
+                                    imgStyle={{ objectFit: 'cover', width: '100%', height: '100%', borderRadius: '0.75rem' }}
                                 />
                                 <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-end p-4 text-white">
                                     <h3 className="text-sm font-semibold">{destino.state}</h3>

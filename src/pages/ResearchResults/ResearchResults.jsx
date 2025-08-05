@@ -4,33 +4,62 @@ import Images from "../../assets/image";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from '../../services/api';
+import ImageWithSkeleton from "../../components/ImageWithSkeleton";
 
 const ResearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const packages = location.state?.packages || [];
-  const count = location.state?.count ?? 0;
+  let packages = location.state?.packages || [];
+  const countOriginal = location.state?.count ?? 0;
+  const stateFilter = location.state?.stateFilter;
   // Recomendaçoes, caso nao haja resultados
   const [recommendations, setRecommendations] = useState([]);
+  // Filtro de estrelas
+  const [starFilter, setStarFilter] = useState(null);
   // Recupera os dados da pesquisa anterior
   const prevOrigin = location.state?.origin || "";
   const prevDestination = location.state?.destination || "";
   const prevStartDate = location.state?.startDate || "";
   const prevEndDate = location.state?.endDate || "";
+  const prevCheckedDateFlex = location.state?.checkedDateFlex || false;
 
   // Estados controlados para os inputs
   const [origin, setOrigin] = useState(prevOrigin);
   const [destination, setDestination] = useState(prevDestination);
   const [startDate, setStartDate] = useState(prevStartDate);
   const [endDate, setEndDate] = useState(prevEndDate);
+  const [checkedDateFlex, setCheckedDateFlex] = useState(prevCheckedDateFlex);
+
+  function formatDateToAPI(dateStr) {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-");
+    return `${day}/${month}/${year}`;
+  }
+  const departureFormated = formatDateToAPI(startDate);
+  const returnFormated = formatDateToAPI(endDate);
+  // Filtro por estado, se vier do banner regional
+  if (stateFilter && packages.length > 0) {
+    packages = packages.filter(pkg => {
+      const pkgState = pkg.lodgingInfo?.location?.state || 'Outro';
+      return pkgState === stateFilter;
+    });
+  } else if (!checkedDateFlex && packages.length > 0) {
+    packages = packages.filter(pkg => {
+      const pkgDeparture = pkg.departureDate || pkg.departure_date;
+      const pkgReturn = pkg.returnDate || pkg.return_date;
+      return (
+        pkgDeparture === departureFormated &&
+        pkgReturn === returnFormated
+      );
+    });
+  }
+  const count = packages.length;
 
   useEffect(() => {
-    // Se não houver resultados, busca recomendações reais
     if (count === 0) {
       api.get('/api/v1/packages')
         .then(res => {
           if (Array.isArray(res.data)) {
-            // Filtra para não sugerir pacotes já pesquisados (se houver critério)
             setRecommendations(res.data.slice(0, 4));
           }
         })
@@ -48,19 +77,64 @@ const ResearchResults = () => {
           style={{ backgroundImage: `url(${Images.Bg_HeroSection})` }}
         >
           <form
-            className="relative top-[-100px] bg-white shadow-lg py-2 px-4 rounded-xl flex gap-4 items-center w-[90%] max-w-5xl"
+            className="relative top-[-100px] bg-white shadow-lg py-4 px-4 rounded-xl flex flex-col gap-2 items-center w-[90%] max-w-5xl"
             onSubmit={async e => {
               e.preventDefault();
-              navigate('/research-results', {
-                state: {
+              const formatDateToAPI = (dateStr) => {
+                if (!dateStr) return "";
+                const [year, month, day] = dateStr.split("-");
+                return `${day}/${month}/${year}`;
+              };
+              const departureFormated = formatDateToAPI(startDate);
+              const returnFormated = formatDateToAPI(endDate);
+              let searchParams;
+              if (checkedDateFlex) {
+                searchParams = {
                   origin,
                   destination,
-                  startDate,
-                  endDate,
-                },
-              });
+                  departureDateStart: departureFormated,
+                  returnDateEnd: returnFormated,
+                };
+              } else {
+                searchParams = {
+                  origin,
+                  destination,
+                  departureDate: departureFormated,
+                  returnDate: returnFormated,
+                };
+              }
+              try {
+                const response = await api.get("/api/v1/packages/search", {
+                  params: searchParams,
+                });
+                const packages = Array.isArray(response.data) ? response.data : [];
+                const count = packages.length;
+                navigate('/research-results', {
+                  state: {
+                    packages,
+                    count,
+                    origin,
+                    destination,
+                    startDate,
+                    endDate,
+                    checkedDateFlex,
+                  },
+                });
+              } catch (error) {
+                navigate('/research-results', {
+                  state: {
+                    packages: [],
+                    count: 0,
+                    origin,
+                    destination,
+                    startDate,
+                    endDate,
+                    checkedDateFlex,
+                  },
+                });
+              }
             }}
-          >
+          ><div className="relative flex gap-4 items-center w-[90%] max-w-5xl">
             <input
               type="text"
               placeholder="Ex: Recife"
@@ -90,6 +164,20 @@ const ResearchResults = () => {
             <button type="submit" className="bg-blue-900 text-white font-semibold px-4 py-2 rounded hover:bg-blue-800">
               Buscar
             </button>
+                   </div>
+          <div className="col-span-full flex items-center">
+     <input
+       type="checkbox"
+       id="dateFlex"
+       checked={checkedDateFlex}
+       onChange={e => setCheckedDateFlex(e.target.checked)}
+       className="mr-2 accent-blue-600"
+     />
+     <label htmlFor="dateFlex" className="text-sm text-gray-700 select-none cursor-pointer">
+       Buscar com datas flexíveis (encontrar pacotes entre as datas escolhidas)
+     </label>
+
+       </div>
           </form>
         </div>
 
@@ -97,22 +185,22 @@ const ResearchResults = () => {
         <div className="relative top-[-100px] max-w-9xl mx-auto mt-10 px-4 grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Filtros */}
           <aside className="bg-white p-6 rounded-lg shadow-md space-y-6">
-            <div>
+            {/* <div>
               <p className="text-sm font-semibold text-gray-700 mb-2">Lugar</p>
               <input
                 type="text"
                 className="w-full border rounded px-3 py-2 text-sm"
                 placeholder="Filtrar por"
               />
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <p className="text-sm font-semibold text-gray-700 mb-2">Lugar</p>
               <input
                 type="text"
                 className="w-full border rounded px-3 py-2 text-sm"
                 placeholder="Filtrar por"
               />
-            </div>
+            </div> */}
             <div>
               <p className="text-sm font-semibold text-gray-700 mb-2">Estrelas</p>
               <div className="space-y-2 text-sm text-gray-700">
@@ -123,12 +211,23 @@ const ResearchResults = () => {
                       className="accent-yellow-500"
                       name="stars"
                       value={star}
+                      checked={starFilter === star}
+                      onChange={() => setStarFilter(star)}
                     />
                     <span className="text-yellow-500">
                       {'★'.repeat(star)}
                     </span>
                   </label>
                 ))}
+                {starFilter && (
+                  <button
+                    className="text-xs text-blue-600 underline mt-2"
+                    onClick={() => setStarFilter(null)}
+                    type="button"
+                  >
+                    Limpar filtro
+                  </button>
+                )}
               </div>
             </div>
           </aside>
@@ -158,7 +257,7 @@ const ResearchResults = () => {
                           className="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row gap-4"
                         >
                           <div className="w-full md:w-1/3 h-20 md:h-44 overflow-hidden rounded relative">
-                            <img
+                            <ImageWithSkeleton
                               src={pkg.packageMedia && pkg.packageMedia.length > 0
                                 ? (pkg.packageMedia[0].mediaUrl.startsWith('http')
                                     ? pkg.packageMedia[0].mediaUrl
@@ -188,7 +287,7 @@ const ResearchResults = () => {
                                 if (Array.isArray(accs) && accs.length > 0) {
                                   return accs.map((acc, idx) => (
                                     acc.iconUrl ? (
-                                      <img
+                                      <ImageWithSkeleton
                                         key={idx}
                                         src={acc.iconUrl.startsWith('http') ? acc.iconUrl : `http://localhost:5110/${acc.iconUrl}`}
                                         alt="Acomodação"
@@ -219,14 +318,17 @@ const ResearchResults = () => {
                 )}
               </>
             ) : (
-              packages.map((pkg, i) => (
+              (starFilter
+                ? packages.filter(pkg => (pkg.stars || 5) === starFilter)
+                : packages
+              ).map((pkg, i) => (
                 <div
                   key={pkg.id || i}
                   className="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row gap-4"
                 >
                   <div className="w-full md:w-1/3 h-20 md:h-44 overflow-hidden rounded relative">
                     {/* Imagem principal do pacote */}
-                    <img
+                    <ImageWithSkeleton
                       src={
                         pkg.packageMedia && pkg.packageMedia.length > 0
                           ? (pkg.packageMedia[0].mediaUrl.startsWith('http')
@@ -241,7 +343,7 @@ const ResearchResults = () => {
                     {pkg.packageMedia && pkg.packageMedia.length > 1 && (
                       <div className="absolute bottom-1 left-1 flex gap-1 bg-black/30 p-1 rounded">
                         {pkg.packageMedia.slice(1, 4).map((img, idx) => (
-                          <img
+                          <ImageWithSkeleton
                             key={idx}
                             src={img.mediaUrl.startsWith('http') ? img.mediaUrl : `http://localhost:5110/${img.mediaUrl}`}
                             alt="Miniatura"
@@ -275,7 +377,7 @@ const ResearchResults = () => {
                         if (Array.isArray(accs) && accs.length > 0) {
                           return accs.map((acc, idx) => (
                             acc.iconUrl ? (
-                              <img
+                              <ImageWithSkeleton
                                 key={idx}
                                 src={acc.iconUrl.startsWith('http') ? acc.iconUrl : `http://localhost:5110/${acc.iconUrl}`}
                                 alt="Acomodação"

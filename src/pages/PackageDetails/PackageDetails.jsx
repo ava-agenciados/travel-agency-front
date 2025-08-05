@@ -1,12 +1,11 @@
 // components/ImageGallery.jsx
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import NavBar from '../../components/Navbar/NavBar';
 import Footer from '../../components/Footer/Footer';
 import MapsDetails from './components/MapsDetails';
 import ImageGallery from './components/ImageGallery';
-// import PackageSummary from './components/PackageSummary';
 import PackageMainInfo from './components/PackageMainInfo';
 import Accommodations from './components/Accommodations';
 import AuthorInfo from './components/AuthorInfo';
@@ -20,11 +19,14 @@ export default function PackageDetails() {
   const [loading, setLoading] = useState(true);
   const [lodgingInfo, setLodgingInfo] = useState(null);
   const [zipCode, setZipCode] = useState('');
-  // Datas de ida e volta vindas do pacote
-
+  const [street, setStreet] = useState('');
+  const [number, setNumber] = useState('');
+  const [neighborhood, setNeighborhood] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [country, setCountry] = useState('');
 
   // Função para garantir formato yyyy-MM-dd
-
   function formatDate(dateStr) {
     if (!dateStr) return '';
     // Se vier no formato dd/MM/yyyy, converte para yyyy-MM-dd
@@ -32,7 +34,6 @@ export default function PackageDetails() {
       const [day, month, year] = dateStr.split('/');
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
-    // Tenta converter normalmente
     const d = new Date(dateStr);
     if (isNaN(d)) return '';
     return d.toISOString().slice(0, 10);
@@ -60,7 +61,7 @@ export default function PackageDetails() {
         startTravel,
         endTravel,
       };
-      await api.post('/api/v1/package-review', payload);
+      navigate('/package-review', { state: { packageID: id, startTravel, endTravel } });
     } catch (error) {
       alert('Erro ao realizar reserva.');
     } finally {
@@ -95,14 +96,38 @@ export default function PackageDetails() {
         if (found && found.lodgingInfo) {
           setLodgingInfo(found.lodgingInfo);
           const rawZip = found.lodgingInfo.location?.zipCode || '';
+          const rawStreet = found.lodgingInfo.location?.street || '';
+          const rawNumber = found.lodgingInfo.location?.number || '';
+          const rawNeighborhood = found.lodgingInfo.location?.neighborhood || '';
+          const rawCity = found.lodgingInfo.location?.city || '';
+          const rawState = found.lodgingInfo.location?.state || '';
+          const rawCountry = found.lodgingInfo.location?.country || '';
           setZipCode(rawZip.replace(/\D/g, ''));
+          setStreet(rawStreet.replace(/\D/g, ''));
+          setNumber(rawNumber.replace(/\D/g, ''));
+          setNeighborhood(rawNeighborhood.replace(/\D/g, ''));
+          setCity(rawCity.replace(/\D/g, ''));
+          setState(rawState.replace(/\D/g, ''));
+          setCountry(rawCountry.replace(/\D/g, ''));
         } else {
           setLodgingInfo(null);
           setZipCode('');
+          setStreet('');
+          setNumber('');
+          setNeighborhood('');
+          setCity('');
+          setState('');
+          setCountry('');
         }
       } catch (e) {
         setLodgingInfo(null);
         setZipCode('');
+        setStreet('');
+        setNumber('');
+        setNeighborhood('');
+        setCity('');
+        setState('');
+        setCountry('');
       }
     }
     
@@ -111,7 +136,19 @@ export default function PackageDetails() {
     } else {
       setLodgingInfo(packageData.lodgingInfo);
       const rawZip = packageData.lodgingInfo.location?.zipCode || '';
+      const rawStreet = found.lodgingInfo.location?.street || '';
+      const rawNumber = found.lodgingInfo.location?.number || '';
+      const rawNeighborhood = found.lodgingInfo.location?.neighborhood || '';
+      const rawCity = found.lodgingInfo.location?.city || '';
+      const rawState = found.lodgingInfo.location?.state || '';
+      const rawCountry = found.lodgingInfo.location?.country || '';
       setZipCode(rawZip.replace(/\D/g, ''));
+      setStreet(rawStreet.replace(/\D/g, ''));
+      setNumber(rawNumber.replace(/\D/g, ''));
+      setNeighborhood(rawNeighborhood.replace(/\D/g, ''));
+      setCity(rawCity.replace(/\D/g, ''));
+      setState(rawState.replace(/\D/g, ''));
+      setCountry(rawCountry.replace(/\D/g, ''));
     }
   }, [id, packageData]);
 
@@ -181,7 +218,7 @@ export default function PackageDetails() {
             <div>
               {/* Preço do pacote: valor original cortado e valor promocional */}
               {packageData.price ? (
-                <p className="text-lg font-bold text-gray-800">
+                <p className="text-lg font-bold text-green-700">
                   {packageData.discountPercent && packageData.discountPercent > 0 ? (
                     <>
                       <span className="line-through text-gray-400 mr-2">R$ {(Number(packageData.price) * 1.2).toLocaleString('pt-BR')}</span>
@@ -209,7 +246,7 @@ export default function PackageDetails() {
           </div>
         </div>
       </section>
-      <MapsDetails zipcode={zipCode} />
+      <MapsDetails zipCode={zipCode} number={number} neighborhood={neighborhood} city={city} state={state} country={country}/>
       <Footer />
     </>
   );

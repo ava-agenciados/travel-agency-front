@@ -7,7 +7,7 @@ export default function PackageSummary({ price }) {
         <input type="date" className="border rounded px-3 py-2 text-sm" defaultValue="2005-03-01" />
       </div>
       <div>
-        <p className="text-lg font-bold text-gray-800">{price ? `R$ ${price}` : 'Preço não informado'}</p>
+        <p className="text-lg font-bold text-green-500">{price ? `R$ ${price}` : 'Preço não informado'}</p>
       </div>
       <button className="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2 rounded">
         Reservar
