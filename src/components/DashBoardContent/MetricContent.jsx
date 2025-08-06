@@ -9,7 +9,8 @@ import {
   RecentInvoices,
   InvoiceStatistics,
   ExportButtons,
-  MonthlyPaymentChart
+  MonthlyPaymentChart,
+  ComboChart
 } from '../../pages/Admin/components/Metrics';
 
 // Registro dos elementos do Chart.js
@@ -144,7 +145,7 @@ const MetricContent = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Container principal com margem superior para não sobrepor o navbar */}
-      <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pt-[125%]">
+      <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pt-[155%]">
         {/* Cards principais + Botões alinhados */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 items-start" id="print-area">
           {mainCards.map((card, index) => (
@@ -176,12 +177,17 @@ const MetricContent = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Gráfico de métodos de pagamento */}
           <PaymentMethodsChart data={metrics.mostUsedPaymentMethods} />
-          
           {/* Gráfico de destinos */}
           <DestinationChart data={metrics.revenueByDestination} />
-          
-          {/* Gráfico de pagamentos mensais - COMENTADO */}
-          {/* <MonthlyPaymentChart data={metrics.mostUsedPaymentMethodsByMonth} /> */}
+        </div>
+
+        {/* Combo Chart */}
+        <div className="mb-8">
+          <ComboChart 
+            salesByPeriod={metrics.salesByPeriod}
+            salesByClient={metrics.salesByClient}
+            totalRevenue={metrics.annualRevenue}
+          />
         </div>
 
         {/* Faturas recentes */}

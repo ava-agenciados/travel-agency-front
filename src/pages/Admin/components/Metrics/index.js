@@ -6,3 +6,4 @@ export { default as RecentInvoices } from './RecentInvoices';
 export { default as InvoiceStatistics } from './InvoiceStatistics';
 export { default as ExportButtons } from './ExportButtons';
 export { default as MonthlyPaymentChart } from './MonthlyPaymentChart';
+export { default as ComboChart } from './ComboChart';
