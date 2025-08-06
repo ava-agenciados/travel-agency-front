@@ -5,6 +5,7 @@ import PackageContent from '../../components/DashBoardContent/PackageContent'
 import BookingsContent from '../../components/DashBoardContent/BookingsContent'
 import DashBoardNavBar from '../../components/DashBoardNavBar/DashBoardNavBar'
 import UserContent from '../../components/DashBoardContent/UsersContent'
+import MetricContent from '../../components/DashBoardContent/MetricContent';
 
 /**
  * Dashboard do Administrador
@@ -126,6 +127,8 @@ const AdminDashboard = () => {
               <UserContent packages={packages} />
             ) : selectedMenu === 'Avaliações' ? (
               <PackageContent title={selectedMenu} packages={packages} />
+            ) : selectedMenu === 'Métricas' ? (
+             <MetricContent />
             ) : (
               <div>Selecione uma opção do menu</div>
             )}
