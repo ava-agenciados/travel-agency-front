@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
 import { getUserProfile } from "../../services/userService";
 
@@ -9,6 +10,7 @@ const NavBar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const navigate = useNavigate();
   // Atualiza dados do usuário
   const updateUserData = async () => {
     try {
@@ -60,6 +62,11 @@ const NavBar = () => {
     setShowDropdown(false);
   };
 
+  const handleProfile = () => {
+    setShowDropdown(false);
+    navigate('/myProfile');
+  };
+
   // Verifica se é admin/atendente usando authService
   const isAdminOrAttendant = authService.isAdmin() || authService.isAtendente();
 
@@ -77,18 +84,15 @@ const NavBar = () => {
             ) : (
               <>
                 <li>
-                  <a href="#">Pacotes</a>
-                </li>
-                <li>
-                  <a href="#">Ofertas</a>
+                  <a href="/">Pacotes</a>
                 </li>
                 {isAuthenticated ? (
                   <li>
-                    <a href="#">Minhas Reservas</a>
+                    <a href="/mybookings">Minhas Reservas</a>
                   </li>
                 ) : (
                   <li>
-                    <a href="#">Promoções</a>
+                    <a href="/">Promoções</a>
                   </li>
                 )}
               </>
@@ -116,9 +120,15 @@ const NavBar = () => {
                     {loading ? "..." : userName || "Usuário"}
                   </button>
                   {showDropdown && (
-                    <div className="absolute right-0 mt-14 w-20 bg-white border rounded shadow-lg z-50">
+                    <div className="absolute right-0 top-full mt-2 w-32 bg-white border rounded shadow-lg z-50">
                       <button
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={handleProfile}
+                      >
+                        Meu perfil
+                      </button>
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-t"
                         onClick={handleLogout}
                       >
                         Sair

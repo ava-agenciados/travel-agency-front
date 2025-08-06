@@ -42,7 +42,7 @@ const Router = () => {
                             </ProtectedRoute>
                         }
                     >
-                        <Route path="userdata" element={<UserProfile/>} />
+                        <Route path="myProfile" element={<UserProfile/>} />
                         <Route path="mybookings" element={<MyBookings/>} />
                     </Route>
                     
