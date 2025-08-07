@@ -82,7 +82,6 @@ const todayStr = formatDateToInput(new Date());
           departureDate: departureFormated,
           returnDate: returnFormated,
         };
-        console.log("teste envio flexivel", searchParams);
       } else {
         searchParams = {
           origin,
@@ -90,7 +89,6 @@ const todayStr = formatDateToInput(new Date());
           departureDate: departureFormated,
           returnDate: returnFormated,
         };
-        console.log("teste envio normal", searchParams);
       }
 
       const response = await api.get("/api/v1/packages/search", {
@@ -120,7 +118,6 @@ const todayStr = formatDateToInput(new Date());
           checkedDateFlex,
         },
       });
-      // console.log("Resultados:", response.data);
     } catch (error) {
       console.error("Erro ao buscar:", error);
       navigate("/research-results", {
@@ -296,13 +293,7 @@ const todayStr = formatDateToInput(new Date());
  </div>
  </div>
 
- <div className="w-full xl:w-[240px] bg-white shadow-md p-4 flex flex-col justify-between">
- <div>
- <p className="text-sm font-semibold">Ad</p>
- <p className="text-xs text-gray-400">https://www.google.com.br</p>
- </div>
- <div className="mt-6 text-blue-600 text-xl">⭐⭐⭐⭐⭐</div>
- </div>
+
  </div>
  </div>
       </section>

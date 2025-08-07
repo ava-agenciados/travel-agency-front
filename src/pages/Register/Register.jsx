@@ -126,7 +126,6 @@ const Register = () => {
       }
 
       const data = await response.json()
-      console.log('Cadastro realizado com sucesso:', data)
 
       setSuccess('Cadastro realizado com sucesso! Redirecionando para login...')
 
@@ -152,7 +151,7 @@ const Register = () => {
         {/* Logo da empresa centralizada em mobile, esquerda no desktop */}
         <div className="text-center lg:text-left">
           <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}
-          >New Horizons</h1>
+          >New Horizon</h1>
         </div>
       </div>
 

@@ -33,7 +33,7 @@ const DayOffers = () => {
     }, []);
 
     return (
-        <section className="bg-gray-100 pb-10">
+        <section id='promotions' className="bg-gray-100 pb-10">
             <div className="bg-white w-full max-w-9xl mx-auto p-6">
                 <h2 className="text-xl font-bold mb-1">OFERTAS DO DIA</h2>
                 <p className="text-[0.5rem] mb-4">ATÉ O ESTOQUE DAS RESERVAS ACABAREM</p>

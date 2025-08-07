@@ -59,7 +59,6 @@ const Login = () => {
       }
 
       const data = await response.json()
-      console.log('Login realizado com sucesso:', data)
       
       // Verificar se o login foi bem-sucedido e há um token
       if (data.success && data.token) {
@@ -67,7 +66,6 @@ const Login = () => {
         const loginResult = login(data.token)
         
         if (loginResult.success) {
-          console.log('Informações do usuário:', loginResult.user)
           
           // Usar o método do authService para redirecionamento
           const redirectUrl = authService.getRedirectUrl()
@@ -96,7 +94,7 @@ const Login = () => {
       <div className="absolute top-4 z-30 w-full lg:w-auto lg:left-6">
         <div className="text-center lg:text-left px-4 lg:px-0">
           <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
-            New Horizons
+            New Horizon
           </h1>
         </div>
       </div> 

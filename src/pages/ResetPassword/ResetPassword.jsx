@@ -213,7 +213,6 @@ const ResetPassword = () => {
 
             const data = await response.json()
 
-            console.log('Senha redefinida com sucesso:', data)
 
             setSuccess('Senha redefinida com sucesso! Redirecionando para login...')
 
@@ -255,7 +254,7 @@ const ResetPassword = () => {
 
                 <div className="text-center">
 
-                    <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizons</h1>
+                    <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>New Horizon</h1>
 
                 </div>
 

@@ -43,7 +43,6 @@ const MetricContent = () => {
         
         setMetrics(metricsData);
         setUserCount(userCountData);
-        console.log('Métricas:', metricsData);
       } catch (err) {
         console.error('Erro ao buscar dados:', err);
       } finally {

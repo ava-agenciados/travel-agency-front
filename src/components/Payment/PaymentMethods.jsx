@@ -30,7 +30,6 @@ const PaymentMethods = forwardRef((props, ref) => {
   }, [packageData?.price, companionsCount, paymentMethod]);
   // Log para depuração dos acompanhantes recebidos via props (evita ReferenceError)
   useEffect(() => {
-    console.log('companions recebidos no PaymentMethods:', companions);
   }, [companions]);
   // Estado para o responsável pelo pagamento (usuário logado)
   const [responsible, setResponsible] = useState(null);
@@ -115,8 +114,6 @@ const PaymentMethods = forwardRef((props, ref) => {
     const validCompanions = Array.isArray(companions)
       ? companions.filter(isValidCompanion)
       : [];
-    // Log para depuração dos acompanhantes antes do envio
-    console.log('companions enviados no payload:', validCompanions);
     // Função para normalizar CPF (remove tudo que não for número)
     function normalizeCPF(cpf) {
       if (!cpf) return '';

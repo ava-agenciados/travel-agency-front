@@ -84,7 +84,7 @@ const NavBar = () => {
             ) : (
               <>
                 <li>
-                  <a href="/">Pacotes</a>
+                  <a href="#packages">Pacotes</a>
                 </li>
                 {isAuthenticated ? (
                   <li>
@@ -92,7 +92,7 @@ const NavBar = () => {
                   </li>
                 ) : (
                   <li>
-                    <a href="/">Promoções</a>
+                    <a href="#promotions">Promoções</a>
                   </li>
                 )}
               </>

@@ -3,7 +3,7 @@ const Footer = () => {
     <footer className="bg-[#15233A] text-white px-6 py-10 items-center">
       <div className="max-w-9xl mx-auto gap-8 flex justify-center items-center">
         <div className="space-y-4">
-          <h2 className="text-xl font-bold italic">New Horizons</h2>
+          <h2 className="text-xl font-bold italic">New Horizon</h2>
           <div className="flex justify-center gap-2">
             <div className="w-8 h-8 bg-blue-500 rounded">
               {/* icon */}

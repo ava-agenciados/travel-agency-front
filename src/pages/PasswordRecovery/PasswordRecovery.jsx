@@ -72,7 +72,6 @@ const PasswordRecovery = () => {
       }
 
       const data = await response.json()
-      console.log('Email de recuperação enviado:', data)
       
       // Mensagem de sucesso
       setSuccessMessage(`Email de recuperação enviado para ${email.trim()}! Verifique sua caixa de entrada e spam.`)
@@ -95,7 +94,7 @@ const PasswordRecovery = () => {
       <div className="absolute top-4 z-30 w-full lg:w-auto lg:left-6">
         <div className="text-center lg:text-left px-4 lg:px-0">
           <h1 className="text-white text-3xl font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
-            New Horizons
+            New Horizon
           </h1>
         </div>
       </div> 

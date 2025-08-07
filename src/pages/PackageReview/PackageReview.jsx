@@ -56,7 +56,6 @@ const PackageReview = () => {
         .catch(() => setPackageData(null));
     }
   }, [packageID]);
-  console.log(packageData);
   // Preencher responsável com dados do usuário logado via API
   useEffect(() => {
     async function fetchUserProfile() {
@@ -132,10 +131,8 @@ const PackageReview = () => {
   // Função para navegar para a tela de pagamento, passando todos os dados necessários
   const handleConfirmPayment = () => {
     // Log para depuração
-    console.log('companions:', companions);
     if (companions.length > 0) {
       companions.forEach((c, idx) => {
-        console.log(`Companion[${idx}]`, c, 'isValid:', isValidCompanion(c));
       });
     }
     // Valida acompanhantes
@@ -158,7 +155,6 @@ const PackageReview = () => {
       },
     });
   }
-  console.log(companions);
 
   // Cálculo do valor total considerando acompanhantes (sem desconto PIX nesta tela)
   const companionsCount = companions.length;

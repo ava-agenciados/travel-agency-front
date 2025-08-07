@@ -5,7 +5,6 @@ const MapsDetails = ({ street, number, neighborhood, city, state, country, zipCo
   const address = addressParts.join(', ');
   const formattedAddress = encodeURIComponent(address);
   const mapaSrc = `https://www.google.com/maps/embed/v1/place?key=${API_KEY}&q=${formattedAddress}`;
-  // console.log("url mapa:", mapaSrc);
   return (
     <section>
       <div className="max-w-9xl mx-auto py-8">

@@ -57,10 +57,8 @@ const ResearchResults = () => {
 
   // Função para reservar um pacote específico
   const handleReserve = (pkg) => {
-    // Pegue as datas do pacote (ajuste os campos conforme o seu backend)
     const startTravel = pkg.departureDate || pkg.departure_date;
     const endTravel = pkg.returnDate || pkg.return_date;
-    console.log("Dados do pacote para reserva:")
     if (!startTravel || !endTravel) {
       alert('Não há datas de viagem disponíveis para este pacote.');
       return;
@@ -69,28 +67,43 @@ const ResearchResults = () => {
       packageID: pkg.id,
       startTravel,
       endTravel,
-      // Adicione outros campos necessários aqui
     };
     navigate('/package-review', { state: payload });
   };
   const count = packages.length;
 
+  // recomendações ta em teste ainda, mas tudo funciona normalmente
   useEffect(() => {
-    if (count === 0) {
-      api.get('/api/v1/packages')
-        .then(res => {
-          if (Array.isArray(res.data)) {
-            setRecommendations(res.data.slice(0, 4));
-          }
-        })
-        .catch(() => setRecommendations([]));
-    }
-  }, [count]);
+  if (count === 0) {
+    try {
+      const recent = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+      if (recent.length > 0) {
+        const { destination } = recent[0];
+        if (destination) {
+          api.get('/api/v1/packages/search', { params: { destination } })
+            .then(res => {
+              if (Array.isArray(res.data)) {
+                setRecommendations(res.data.slice(0, 4));
+              }
+            })
+            .catch(() => setRecommendations([]));
+          return;
+        }
+      }
+    } catch {}
+    api.get('/api/v1/packages')
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          setRecommendations(res.data.slice(0, 4));
+        }
+      })
+      .catch(() => setRecommendations([]));
+  }
+}, [count]);
 
   return (
     <>
       <section className="relative bg-gray-100">
-        {/* Imagem de fundo com busca sobreposta */}
         <NavBar />
         <div
           className="h-[320px] w-full bg-cover bg-center flex items-end justify-center pb-6"
@@ -154,37 +167,38 @@ const ResearchResults = () => {
                 });
               }
             }}
-          ><div className="relative flex gap-4 items-center w-[90%] max-w-5xl">
+            >
+          <div className="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 w-full max-w-5xl items-center">
             <input
               type="text"
               placeholder="Ex: Recife"
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="border rounded px-3 py-2 text-sm w-full"
               value={origin}
               onChange={e => setOrigin(e.target.value)}
             />
             <input
               type="text"
-              placeholder="Ex: Vitória"
-              className="w-full border rounded px-3 py-2 text-sm"
+              placeholder="Ex: Vitória"
+              className="border rounded px-3 py-2 text-sm w-full"
               value={destination}
               onChange={e => setDestination(e.target.value)}
             />
             <input
               type="date"
-              className="border rounded px-3 py-2 text-sm"
+              className="border rounded px-3 py-2 text-sm w-full"
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
             />
             <input
               type="date"
-              className="border rounded px-3 py-2 text-sm"
+              className="border rounded px-3 py-2 text-sm w-full"
               value={endDate}
               onChange={e => setEndDate(e.target.value)}
             />
-            <button type="submit" className="bg-blue-900 text-white font-semibold px-4 py-2 rounded hover:bg-blue-800">
+            <button type="submit" className="bg-blue-900 text-white font-semibold px-4 py-2 rounded hover:bg-blue-800 w-full">
               Buscar
             </button>
-                   </div>
+          </div>
           <div className="col-span-full flex items-center">
      <input
        type="checkbox"
@@ -201,26 +215,9 @@ const ResearchResults = () => {
           </form>
         </div>
 
-        {/* Resultados + filtros */}
         <div className="relative top-[-100px] max-w-9xl mx-auto mt-10 px-4 grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Filtros */}
           <aside className="bg-white p-6 rounded-lg shadow-md space-y-6">
-            {/* <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">Lugar</p>
-              <input
-                type="text"
-                className="w-full border rounded px-3 py-2 text-sm"
-                placeholder="Filtrar por"
-              />
-            </div> */}
-            {/* <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">Lugar</p>
-              <input
-                type="text"
-                className="w-full border rounded px-3 py-2 text-sm"
-                placeholder="Filtrar por"
-              />
-            </div> */}
+
             <div>
               <p className="text-sm font-semibold text-gray-700 mb-2">Estrelas</p>
               <div className="space-y-2 text-sm text-gray-700">
@@ -252,7 +249,6 @@ const ResearchResults = () => {
             </div>
           </aside>
 
-          {/* Resultados */}
           <main className="bg-white p-6 md:col-span-3 space-y-6">
             <div className="flex gap-3">
               <Link to="/">

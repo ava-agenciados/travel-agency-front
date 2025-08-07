@@ -79,7 +79,6 @@ const ImageWithFallback = ({ src, alt, className, ...props }) => {
       alt={alt}
       className={className}
       onError={handleError}
-      onLoad={() => console.log('Imagem renderizada com sucesso:', src)}
       {...props}
     />
   );
@@ -111,9 +110,6 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
   const [currentPage, setCurrentPage] = useState(1);
   // Abrir modal de visualizar/editar
   const handleView = async (pkg) => {
-    console.log('Pacote selecionado:', pkg);
-    console.log('beginDate:', pkg.beginDate, 'endDate:', pkg.endDate);
-    console.log('packageMedia:', pkg.packageMedia);
     setSelectedPackage(pkg);
     setShowModal(true);
     setViewMediaLoading(true);
@@ -122,8 +118,6 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
       const res = await fetch(`/api/v1/dashboard/packages/${pkg.id}/media`);
       if (res.ok) {
         const media = await res.json();
-        console.log('Media da API:', media);
-        console.log('Estrutura do primeiro item:', media[0]);
         setViewMedia(Array.isArray(media) ? media : []);
       } else {
         setViewMedia([]);
@@ -316,7 +310,6 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
         } catch (err) {
           console.error('Erro ao fazer parse do JSON de criação do pacote:', err);
         }
-        console.log('Pacote criado:', created);
         // Tentar extrair o id do pacote de diferentes formas
         let packageId = undefined;
         if (created) {
@@ -346,16 +339,13 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
           if (!packageId) {
             console.warn('packageId não encontrado após criação do pacote. Buscando todos os pacotes...');
             packageId = await getLastPackageId();
-            console.log('packageId obtido via busca:', packageId);
           }
-          console.log('mediaFiles:', mediaFiles);
           // Se houver arquivos de mídia, faz upload
           if (packageId && mediaFiles.length > 0) {
             setMediaLoading(true);
             const formData = new FormData();
             mediaFiles.forEach(file => formData.append('media', file));
             try {
-              console.log('Enviando mídia para o pacote:', packageId, formData);
               const uploadRes = await fetch(`/api/v1/dashboard/packages/${packageId}/add-midia`, {
                 method: 'POST',
                 body: formData
@@ -872,16 +862,13 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                 <div className="text-blue-500">Carregando fotos...</div>
               ) : (
                 <div className="flex flex-wrap gap-2 justify-center mb-4">
-                  {console.log('Renderizando imagens. viewMedia:', viewMedia, 'selectedPackage.packageMedia:', selectedPackage?.packageMedia)}
                   
                   {/* Renderiza imagens de viewMedia (da API) */}
                   {viewMedia && viewMedia.length > 0 && viewMedia
                     .filter(media => {
-                      console.log('Processando media item:', media);
                       // Verifica diferentes propriedades para o nome do arquivo
                       const fileName = media.name || media.mediaUrl || media.url || media.filename;
                       const isImage = fileName && fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                      console.log('fileName:', fileName, 'isImage:', isImage);
                       return isImage;
                     })
                     .map((media, idx) => {
@@ -889,7 +876,6 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                       const fileName = media.name || media.mediaUrl || media.url || media.filename;
                       const cleanFileName = fileName.replace(/\\/g, '/').split('/').pop();
                       const imageUrl = `${API_BASE_URL}/uploads/${selectedPackage.id}/${cleanFileName}`;
-                      console.log('Construindo URL da imagem:', imageUrl, 'para media:', media);
                       
                       return (
                         <ImageWithFallback
@@ -912,7 +898,6 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                       const fileName = media.mediaUrl || media.name || media;
                       const cleanFileName = fileName.replace(/\\/g, '/').split('/').pop();
                       const imageUrl = `${API_BASE_URL}/uploads/${selectedPackage.id}/${cleanFileName}`;
-                      console.log('Imagem packageMedia:', imageUrl);
                       
                       return (
                         <ImageWithFallback
@@ -950,25 +935,6 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                 }</span>
                 <span><b>Data de Saída:</b> {
                   (() => {
-                    // Debug: vamos ver todos os campos disponíveis do pacote
-                    console.log('DEBUG - Todos os campos do pacote:', Object.keys(selectedPackage));
-                    console.log('DEBUG - Campos de data específicos:', {
-                      beginDate: selectedPackage.beginDate,
-                      endDate: selectedPackage.endDate,
-                      departureDate: selectedPackage.departureDate,
-                      returnDate: selectedPackage.returnDate,
-                      startDate: selectedPackage.startDate,
-                      finishDate: selectedPackage.finishDate,
-                      departure_date: selectedPackage.departure_date,
-                      return_date: selectedPackage.return_date,
-                      start_date: selectedPackage.start_date,
-                      finish_date: selectedPackage.finish_date,
-                      begin_date: selectedPackage.begin_date,
-                      end_date: selectedPackage.end_date,
-                      createdAt: selectedPackage.createdAt,
-                      updatedAt: selectedPackage.updatedAt
-                    });
-                    
                     // Tenta vários campos possíveis para data de saída
                     const possibleDateFields = [
                       selectedPackage.beginDate,
@@ -981,7 +947,6 @@ const DashBoardContent = ({ title, packages = [], onPackageUpdate }) => {
                     
                     for (const dateField of possibleDateFields) {
                       if (dateField) {
-                        console.log('DEBUG - Campo de data encontrado para saída:', dateField);
                         // Se já está no formato brasileiro (dd/MM/yyyy), retorna como está
                         if (typeof dateField === 'string' && dateField.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
                           return dateField;
