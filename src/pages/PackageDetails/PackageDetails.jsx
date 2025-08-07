@@ -105,12 +105,12 @@ export default function PackageDetails() {
           const rawState = found.lodgingInfo.location?.state || '';
           const rawCountry = found.lodgingInfo.location?.country || '';
           setZipCode(rawZip.replace(/\D/g, ''));
-          setStreet(rawStreet.replace(/\D/g, ''));
-          setNumber(rawNumber.replace(/\D/g, ''));
-          setNeighborhood(rawNeighborhood.replace(/\D/g, ''));
-          setCity(rawCity.replace(/\D/g, ''));
-          setState(rawState.replace(/\D/g, ''));
-          setCountry(rawCountry.replace(/\D/g, ''));
+          setStreet(rawStreet);
+          setNumber(rawNumber);
+          setNeighborhood(rawNeighborhood);
+          setCity(rawCity);
+          setState(rawState);
+          setCountry(rawCountry);
         } else {
           setLodgingInfo(null);
           setZipCode('');
@@ -138,19 +138,19 @@ export default function PackageDetails() {
     } else {
       setLodgingInfo(packageData.lodgingInfo);
       const rawZip = packageData.lodgingInfo.location?.zipCode || '';
-      const rawStreet = found.lodgingInfo.location?.street || '';
-      const rawNumber = found.lodgingInfo.location?.number || '';
-      const rawNeighborhood = found.lodgingInfo.location?.neighborhood || '';
-      const rawCity = found.lodgingInfo.location?.city || '';
-      const rawState = found.lodgingInfo.location?.state || '';
-      const rawCountry = found.lodgingInfo.location?.country || '';
+      const rawStreet = packageData.lodgingInfo.location?.street || '';
+      const rawNumber = packageData.lodgingInfo.location?.number || '';
+      const rawNeighborhood = packageData.lodgingInfo.location?.neighborhood || '';
+      const rawCity = packageData.lodgingInfo.location?.city || '';
+      const rawState = packageData.lodgingInfo.location?.state || '';
+      const rawCountry = packageData.lodgingInfo.location?.country || '';
       setZipCode(rawZip.replace(/\D/g, ''));
-      setStreet(rawStreet.replace(/\D/g, ''));
-      setNumber(rawNumber.replace(/\D/g, ''));
-      setNeighborhood(rawNeighborhood.replace(/\D/g, ''));
-      setCity(rawCity.replace(/\D/g, ''));
-      setState(rawState.replace(/\D/g, ''));
-      setCountry(rawCountry.replace(/\D/g, ''));
+      setStreet(rawStreet);
+      setNumber(rawNumber);
+      setNeighborhood(rawNeighborhood);
+      setCity(rawCity);
+      setState(rawState);
+      setCountry(rawCountry);
     }
   }, [id, packageData]);
 
@@ -250,7 +250,7 @@ export default function PackageDetails() {
           </div>
         </div>
       </section>
-      <MapsDetails zipCode={zipCode} number={number} neighborhood={neighborhood} city={city} state={state} country={country}/>
+      <MapsDetails street={street}  number={number} neighborhood={neighborhood} city={city} state={state} country={country} zipCode={zipCode}/>
       <Footer />
     </>
   );
